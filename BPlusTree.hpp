@@ -32,15 +32,36 @@ namespace BPlusTreeN
 				keys=new KeyT(2*capacity);
 				parent=nullptr;
 				childs=new Node<KeyT,ValueT>*[2*capacity];
+				for (int i = 0; i < 2*capacity; ++i)
+				{
+					childs[i]=nullptr;
+				}
 				left=nullptr;
 				right=nullptr;
 				values=new ValueT(2*capacity);
+			}
+			Node(const size_t &capacity,const bool &ourbool,const KeyT& key, const ValueT& value)
+			{
+				leaf=ourbool;
+				key_num=0;
+				keys=new KeyT(2*capacity);
+				keys[0] = key;
+				parent=nullptr;
+				childs=new Node<KeyT,ValueT>*[2*capacity];
+				for (int i = 0; i <=2*capacity; ++i)
+				{
+					childs[i]=nullptr;
+				}
+				left=nullptr;
+				right=nullptr;
+				values=new ValueT(2*capacity);
+				values[0] = value;
 			}
 			bool iskeyinnode(const KeyT& findkey)
 			{
 				for (int i = 0; i < key_num; ++i)
 				{
-					if(keys[i] == findkey)
+					if(keys && keys[i] == findkey)
 					{
 						return true;
 					}
@@ -70,7 +91,7 @@ namespace BPlusTreeN
 			}
 			void setkeys(const size_t& index,const KeyT& keyvalue)
 			{
-				this->keys[index] = keyvalue;
+				if (this->keys) this->keys[index] = keyvalue;
 			}
 			Node *getparent()
 			{
@@ -88,7 +109,7 @@ namespace BPlusTreeN
 			}
 			void setchilds(const size_t& index,Node * insertnode)
 			{
-				this->childs[index] = insertnode;
+				if (this->childs) this->childs[index] = insertnode;
 			}
 			ValueT *getvalues()
 			{
@@ -97,7 +118,7 @@ namespace BPlusTreeN
 			}
 			void setvalues(const size_t& index, const ValueT& insertvalue)
 			{
-				this->values[index] = insertvalue;
+				if (this->values) this->values[index] = insertvalue;
 			}
 			Node *getleft()
 			{
@@ -119,11 +140,13 @@ namespace BPlusTreeN
 			}
 			friend std::ostream& operator<<(std::ostream& os, Node& current)
 	        {
+	        	// if (current.getleaf() == true) std::cout<<"true";
+	        	// else std::cout<<"false";
 	        	for (int i = 0; i < current.getkey_num(); ++i)
 	        	{
 	        		if(current.getkeys()) os<<current.getkeys()[i]<<" ";
 	        	}
-	        	os<<"||";
+	        	// os<<"||";
 	        	os<<std::endl;
 	            return os;
 	        }
@@ -147,6 +170,10 @@ namespace BPlusTreeN
 			void split(Node<KeyT,ValueT>*);
 			Node<KeyT,ValueT> *findtoinsert(const KeyT&);
 			void print(size_t,  Node<KeyT, ValueT>*);
+			Node<KeyT,ValueT> *getroot()
+			{
+				return this->root;
+			};
 	    private:
 	    	int nodecapacity;
 	    	Node<KeyT,ValueT> *root;

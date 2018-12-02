@@ -7,14 +7,6 @@
 #include "BPlusTree.hpp"
 namespace BPlusTreeN
 {
-	// template <typename KeyT,typename ValueT> 
-	// void BPlusTree<KeyT,ValueT>::initializeNode(Node<KeyT,ValueT>* current)
-	// {
-	// 	current->leaf=false;
-	// 	current->key_num=0;
-	// 	current->keys=nullptr;
-	// }
-
 	//find leaf to insert value and key
 	template <typename KeyT,typename ValueT> 
 	Node<KeyT,ValueT>* BPlusTree<KeyT,ValueT>::findtoinsert(const KeyT& key)
@@ -24,10 +16,14 @@ namespace BPlusTreeN
 		{
 			for (int i = 0; i <= current->getkey_num(); ++i) //go through all keys in every level
 			{
-				if (current && (i == current->getkey_num() || (current->getkeys() && key < current->getkeys()[i]))) 
-					current=current->getchilds()[i]; 
+				// std::cout<<"i: "<<i;
+				if ((i == current->getkey_num() || (current->getkeys() && key < current->getkeys()[i]))) 
+				{
+					current = current->getchilds()[i]; 
 					break;
+				}
 			}
+			// if (current->getleaf() != true) std::cout<<"1";
 		}
 		return current;
 	}
@@ -44,6 +40,7 @@ namespace BPlusTreeN
 
 		//realocating nodecapacity - 1 keys and their values to newnode
 		KeyT mid_key = node->getkeys()[nodecapacity];
+		ValueT mid_value = node->getvalues()[nodecapacity];
 		newnode->setkey_num(nodecapacity-1);
 		node->setkey_num(nodecapacity);  
 //need to check if we in leaf and do not have to reallocate values
@@ -54,7 +51,7 @@ namespace BPlusTreeN
 			newnode->setchilds(i, node->getchilds()[i+nodecapacity+1]); // maybe check for leaf
 		}
 		newnode->setchilds(newnode->getkey_num(), node->getchilds()[2 * nodecapacity]);//add last child
-
+//letter decide about what to do with children
 		//if splitting node is leafe we need to add middle value to newnode values
 		if (node->getleaf()) 
 		{
@@ -63,18 +60,18 @@ namespace BPlusTreeN
 			//reallocating values and keys
 			for(int j = newnode->getkey_num()-1; j>0;j--)
 			{
-				newnode->setkeys(j, node->getkeys()[j-1]);
-				newnode->setvalues(j, node->getvalues()[j-1]);
+				newnode->setkeys(j, newnode->getkeys()[j-1]);
+				newnode->setvalues(j, newnode->getvalues()[j-1]);
 			}
 			//setting middle value to newnode values
-			newnode->setkeys(0, node->getkeys()[0]);
-			newnode->setvalues(0, node->getvalues()[0]);
+			newnode->setkeys(0, mid_key);
+			newnode->setvalues(0, mid_value);
 		}
 
 		//if splitting node - root we need to create new one 
 		if (node == this->root)
 		{
-			this->root= new Node<KeyT, ValueT>(this->nodecapacity,node->getleaf());
+			this->root= new Node<KeyT, ValueT>(this->nodecapacity,false);
 			//add middle key to new root node and set node and newnode as childs
 			this->root->setkeys(0, mid_key); 
 			this->root->setchilds(0, node);
@@ -93,7 +90,7 @@ namespace BPlusTreeN
 
 			//find position in parent node to insert middle
 			size_t position = 0;
-			while (position < helpparent->getkey_num() && helpparent->getkeys()[position] < mid_key)
+			while (position < helpparent->getkey_num() && (helpparent->getkeys() && helpparent->getkeys()[position] < mid_key))
 				++position;
 			//reallocate keys 
 			for(size_t i = helpparent->getkey_num(); i >= position +1; i--)
@@ -128,14 +125,14 @@ namespace BPlusTreeN
 
 		//find position to insert
 		size_t position = 0;
-		while(position < curleaf->getkey_num() && curleaf->getkeys()[position] < key)
+		while(position < curleaf->getkey_num() && (curleaf->getkeys() && curleaf->getkeys()[position] < key))
 			position++;
 
 		//reallocate keys and values
 		for (int i = curleaf->getkey_num(); i > position; ++i)
 		{
-			curleaf->setkeys(i, curleaf->getkeys()[i-1]);
-			curleaf->setvalues(i, curleaf->getvalues()[i-1]);
+			if (curleaf->getkeys()) curleaf->setkeys(i, curleaf->getkeys()[i-1]);
+			if (curleaf->getvalues()) curleaf->setvalues(i, curleaf->getvalues()[i-1]);
 		}
 		//add key and value			
 		curleaf->setkeys(position, key);
@@ -150,18 +147,19 @@ namespace BPlusTreeN
 	template <typename KeyT,typename ValueT> 
 	void BPlusTree<KeyT,ValueT>::print(size_t k, Node<KeyT, ValueT>* curleaf)
 	{
+		if (!curleaf) return;
+
 		for (int i = 0; i < k; ++i)
 		{
 			std::cout<<"*";
 		}
-		if (curleaf) std::cout<<*curleaf;
-		if (curleaf) {
-		for (int i = 0; i <= curleaf->getkey_num(); ++i)
+		std::cout<<*curleaf;
+		if (curleaf->getleaf()) return;
+		for (int i = 0; i <=curleaf->getkey_num(); ++i)
 		{
+			// std::cout<<"k: "<<k<<"i: "<<i<<std::endl;
 			if (curleaf->getchilds()) print(k+1,curleaf->getchilds()[i]);
-			k--;
-		}}
-		
+		}
 	}
 }
 // template struct BPlusTreeN::Node<int,int>;
@@ -169,11 +167,27 @@ namespace BPlusTreeN
 // BPlusTreeN::BPlusTree<int,int> *jk = new BPlusTreeN::BPlusTree<int,int>();
 int main()
 {
-	BPlusTreeN::Node<int,int> *root = new BPlusTreeN::Node<int,int>(1,true);
-	BPlusTreeN::BPlusTree<int,int> *ourtree = new BPlusTreeN::BPlusTree<int,int>(1,root);
+	BPlusTreeN::Node<int,int> *root = new BPlusTreeN::Node<int,int>(2,1,5,true);
+	BPlusTreeN::BPlusTree<int,int> *ourtree = new BPlusTreeN::BPlusTree<int,int>(2,root);
 	ourtree->insert(1,5);
 	ourtree->insert(2,6);
 	ourtree->insert(5,7);
 	ourtree->insert(9,11);
-	ourtree->print(0,root);
+	// if (!ourtree->insert(9,11)) std::cout<<"Have such";
+	ourtree->print(0,ourtree->getroot());
+	// std::cout<<*(ourtree->getroot());
+	// for (int i = 0; i <=ourtree->getroot()->getkey_num(); ++i)
+	// 	{
+	// 		if((ourtree->getroot()->getchilds()[i])) 
+	// 		{
+	// 			for (int j = 0; j < ourtree->getroot()->getchilds()[i]->getkey_num(); ++j)
+	// 			{
+	// 				if (ourtree->getroot()->getchilds()[i]->getkeys()) 
+	// 					{
+	// 						std::cout<<((ourtree->getroot()->getchilds()[i]->getkeys())[j])<<" ";
+	// 						std::cout<<std::endl<<"i: "<<i<<"j: "<<j<<std::endl;
+	// 					}
+	// 			}
+	// 		}
+	// 	}
 }
