@@ -46,8 +46,8 @@ namespace BPlusTreeN
 			}
 			~Node()
 			{
-				delete [] keys;
-				delete [] values;
+				if (keys) delete [] keys;
+				if (values) delete [] values;
 				if (!leaf)
 				{
 					for (int i = 0; i <=key_num; ++i)
@@ -193,10 +193,10 @@ namespace BPlusTreeN
 			// 	root=ourroot;
 			// }
 			bool insert(const KeyT&, const ValueT&);
-			void remove (const KeyT&);
 			void split(Node<KeyT,ValueT>*);
 			Node<KeyT,ValueT> *findtoinsert(const KeyT&);
 			void print(size_t,  Node<KeyT, ValueT>*);
+			bool remove(const KeyT&);
 			Node<KeyT,ValueT> *getroot()
 			{
 				return this->root;
@@ -208,6 +208,7 @@ namespace BPlusTreeN
 	    private:
 	    	int nodecapacity;
 	    	Node<KeyT,ValueT> *root;
+	    	void removeinnode(Node<KeyT, ValueT>*, const KeyT& key);
 	    	// void initializeNode(Node<KeyT,ValueT>*);
 	  //   	void freeNode(Node<KeyT,ValueT>);
 			// };
