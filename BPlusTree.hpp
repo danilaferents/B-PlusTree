@@ -29,7 +29,11 @@ namespace BPlusTreeN
 			{
 				leaf=ourbool;
 				key_num=0;
-				keys=new KeyT(2*capacity);
+				keys=new KeyT[2*capacity];
+				// for (int i = 0; i < 2*capacity; ++i)
+				// {
+				// 	keys[i]=0;
+				// }
 				parent=nullptr;
 				childs=new Node<KeyT,ValueT>*[2*capacity];
 				for (int i = 0; i < 2*capacity; ++i)
@@ -38,25 +42,43 @@ namespace BPlusTreeN
 				}
 				left=nullptr;
 				right=nullptr;
-				values=new ValueT(2*capacity);
+				values=new ValueT[2*capacity];
 			}
-			Node(const size_t &capacity,const bool &ourbool,const KeyT& key, const ValueT& value)
+			~Node()
 			{
-				leaf=ourbool;
-				key_num=0;
-				keys=new KeyT(2*capacity);
-				keys[0] = key;
-				parent=nullptr;
-				childs=new Node<KeyT,ValueT>*[2*capacity];
-				for (int i = 0; i <=2*capacity; ++i)
+				delete [] keys;
+				delete [] values;
+				if (!leaf)
 				{
-					childs[i]=nullptr;
+					for (int i = 0; i <=key_num; ++i)
+					{
+						if(childs && childs[i]) delete childs[i];
+					}
+					delete [] childs;
 				}
-				left=nullptr;
-				right=nullptr;
-				values=new ValueT(2*capacity);
-				values[0] = value;
+				else 
+				{
+					delete [] childs;
+				}
+				
 			}
+			// Node(const size_t &capacity,const bool &ourbool,const KeyT& key, const ValueT& value)
+			// {
+			// 	leaf=ourbool;
+			// 	key_num=1;
+			// 	keys=new KeyT(2*capacity);
+			// 	keys[0] = key;
+			// 	parent=nullptr;
+			// 	childs=new Node<KeyT,ValueT>*[2*capacity];
+			// 	for (int i = 0; i <=2*capacity; ++i)
+			// 	{
+			// 		childs[i]=nullptr;
+			// 	}
+			// 	left=nullptr;
+			// 	right=nullptr;
+			// 	values=new ValueT(2*capacity);
+			// 	values[0] = value;
+			// }
 			bool iskeyinnode(const KeyT& findkey)
 			{
 				for (int i = 0; i < key_num; ++i)
@@ -145,6 +167,7 @@ namespace BPlusTreeN
 	        	for (int i = 0; i < current.getkey_num(); ++i)
 	        	{
 	        		if(current.getkeys()) os<<current.getkeys()[i]<<" ";
+	        		if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
 	        	}
 	        	// os<<"||";
 	        	os<<std::endl;
@@ -155,16 +178,20 @@ namespace BPlusTreeN
 	class BPlusTree
 	{
 		public:
-			BPlusTree()
-			{
-				nodecapacity=0;
-				root=nullptr;
-			}
-			BPlusTree(const size_t& ourcapacity,Node<KeyT, ValueT>* ourroot)
+			BPlusTree(const size_t& ourcapacity)
 			{
 				nodecapacity=ourcapacity;
-				root=ourroot;
+				root=nullptr;
 			}
+			~BPlusTree()
+			{
+				delete root;
+			}
+			// BPlusTree(const size_t& ourcapacity,Node<KeyT, ValueT>* ourroot)
+			// {
+			// 	nodecapacity=ourcapacity;
+			// 	root=ourroot;
+			// }
 			bool insert(const KeyT&, const ValueT&);
 			void remove (const KeyT&);
 			void split(Node<KeyT,ValueT>*);
@@ -174,6 +201,10 @@ namespace BPlusTreeN
 			{
 				return this->root;
 			};
+			size_t getcapacity()
+			{
+				return nodecapacity;
+			}
 	    private:
 	    	int nodecapacity;
 	    	Node<KeyT,ValueT> *root;

@@ -74,6 +74,7 @@ namespace BPlusTreeN
 			this->root= new Node<KeyT, ValueT>(this->nodecapacity,false);
 			//add middle key to new root node and set node and newnode as childs
 			this->root->setkeys(0, mid_key); 
+			this->root->setvalues(0, mid_value);
 			this->root->setchilds(0, node);
 			this->root->setchilds(1, newnode);
 			this->root->setkey_num(1);
@@ -117,6 +118,16 @@ namespace BPlusTreeN
 	template <typename KeyT,typename ValueT> 
 	bool BPlusTree<KeyT,ValueT>::insert(const KeyT& key,const ValueT& value)
 	{
+		//if tree is emrty add as root
+		if (root == nullptr)
+		{
+			Node<KeyT, ValueT> *newroot = new Node<KeyT, ValueT>(this->nodecapacity,true);
+			newroot->setkeys(0,key);
+			newroot->setvalues(0,value);
+			newroot->setkey_num(1);
+			root = newroot;
+			return true;
+		}
 		//find leaf to insert
 		Node<KeyT, ValueT>* curleaf = findtoinsert(key);
 		//if key in keys return false
@@ -128,17 +139,24 @@ namespace BPlusTreeN
 		while(position < curleaf->getkey_num() && (curleaf->getkeys() && curleaf->getkeys()[position] < key))
 			position++;
 
+		
+
 		//reallocate keys and values
-		for (int i = curleaf->getkey_num(); i > position; ++i)
+		for (int i = curleaf->getkey_num(); i > position; i--)
 		{
 			if (curleaf->getkeys()) curleaf->setkeys(i, curleaf->getkeys()[i-1]);
 			if (curleaf->getvalues()) curleaf->setvalues(i, curleaf->getvalues()[i-1]);
 		}
+
+		size_t help = curleaf->getkey_num();
+		help++;
+		curleaf->setkey_num(help);
+		
 		//add key and value			
 		curleaf->setkeys(position, key);
-		curleaf->setkey_num(curleaf->getkey_num() + 1);
+		curleaf->setvalues(position, value);
 		//start split if we have overflow
-		if (curleaf->getkey_num() == 2 * nodecapacity)
+		if (curleaf->getkey_num() == (2 * nodecapacity))
 			split(curleaf);
 		return true;
 	}
@@ -162,32 +180,32 @@ namespace BPlusTreeN
 		}
 	}
 }
+using namespace BPlusTreeN;
 // template struct BPlusTreeN::Node<int,int>;
 // template class BPlusTreeN::BPlusTree<int,int>;
 // BPlusTreeN::BPlusTree<int,int> *jk = new BPlusTreeN::BPlusTree<int,int>();
-int main()
-{
-	BPlusTreeN::Node<int,int> *root = new BPlusTreeN::Node<int,int>(2,1,5,true);
-	BPlusTreeN::BPlusTree<int,int> *ourtree = new BPlusTreeN::BPlusTree<int,int>(2,root);
-	ourtree->insert(1,5);
-	ourtree->insert(2,6);
-	ourtree->insert(5,7);
-	ourtree->insert(9,11);
-	// if (!ourtree->insert(9,11)) std::cout<<"Have such";
-	ourtree->print(0,ourtree->getroot());
-	// std::cout<<*(ourtree->getroot());
-	// for (int i = 0; i <=ourtree->getroot()->getkey_num(); ++i)
-	// 	{
-	// 		if((ourtree->getroot()->getchilds()[i])) 
-	// 		{
-	// 			for (int j = 0; j < ourtree->getroot()->getchilds()[i]->getkey_num(); ++j)
-	// 			{
-	// 				if (ourtree->getroot()->getchilds()[i]->getkeys()) 
-	// 					{
-	// 						std::cout<<((ourtree->getroot()->getchilds()[i]->getkeys())[j])<<" ";
-	// 						std::cout<<std::endl<<"i: "<<i<<"j: "<<j<<std::endl;
-	// 					}
-	// 			}
-	// 		}
-	// 	}
-}
+// int main()
+// {
+// 	// Node<char,int> *root = new Node<char,int>(2,true);
+// 	BPlusTree<char,int> *ourtree = new BPlusTree<char,int>(2);
+// 	ourtree->insert('d',3);
+// 	// if (!ourtree->getroot()) std::cout<<"nullptr";
+// 	ourtree->insert('c',6);
+// 	// std::cout<<ourtree->getroot()->getkey_num();
+// 	// std::cout<<ourtree->getcapacity();
+// 	// std::cout<<ourtree->getroot()->getkeys()[2];
+// 	// for (int i = 0; i <=ourtree->getroot()->getkey_num(); ++i)
+// 	// 	{
+// 	// 		if((ourtree->getroot()->getchilds()[i])) 
+// 	// 		{
+// 	// 			for (int j = 0; j < ourtree->getroot()->getchilds()[i]->getkey_num(); ++j)
+// 	// 			{
+// 	// 				if (ourtree->getroot()->getchilds()[i]->getkeys()) 
+// 	// 				{
+// 	// 					std::cout<<((ourtree->getroot()->getchilds()[i]->getkeys())[j])<<std::endl;
+// 	// 				}
+// 	// 			}
+// 	// 		}
+// 	// 	}
+// 	ourtree->print(0,ourtree->getroot());
+// }
