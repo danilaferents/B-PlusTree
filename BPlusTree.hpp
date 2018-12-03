@@ -35,8 +35,8 @@ namespace BPlusTreeN
 				// 	keys[i]=0;
 				// }
 				parent=nullptr;
-				childs=new Node<KeyT,ValueT>*[2*capacity];
-				for (int i = 0; i < 2*capacity; ++i)
+				childs=new Node<KeyT,ValueT>*[2*capacity+1]; //more children 
+				for (int i = 0; i <2*capacity+1; ++i)
 				{
 					childs[i]=nullptr;
 				}
@@ -122,7 +122,7 @@ namespace BPlusTreeN
 			}
 			void setparent(Node* currentparent)
 			{
-				return void(parent = currentparent);
+				this->parent = currentparent;
 			}
 			Node **getchilds()
 			{
@@ -162,16 +162,50 @@ namespace BPlusTreeN
 			}
 			friend std::ostream& operator<<(std::ostream& os, Node& current)
 	        {
-	        	// if (current.getleaf() == true) std::cout<<"true";
-	        	// else std::cout<<"false";
-	        	for (int i = 0; i < current.getkey_num(); ++i)
-	        	{
-	        		if(current.getkeys()) os<<current.getkeys()[i]<<" ";
-	        		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
-	        	}
-	        	// os<<"||";
-	        	os<<std::endl;
-	            return os;
+	        	// // if (current.getleaf() == true) std::cout<<"true";
+	        	// // else std::cout<<"false";
+	        	// os<<"Keys:"<<std::endl;
+	        	// for (int i = 0; i < current.getkey_num(); ++i)
+	        	// {
+	        	// 	if(current.getkeys()) os<<current.getkeys()[i]<<" ";
+	        	// 	// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+	        	// }
+	        	// // os<<std::endl;
+	        	// os<<"Values:"<<std::endl;
+	        	// for (int i = 0; i < current.getkey_num(); ++i)
+	        	// {
+	        	// 	if(current.getvalues()) os<<current.getvalues()[i]<<" ";
+	        	// 	// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+	        	// }
+	        	// os<<std::endl<<"Children: "<<std::endl;
+	        	// for (int i = 0; i <= current.getkey_num(); ++i)
+	        	// {
+	        	// 	if(current.getchilds() && current.getchilds()[i]) 
+	        	// 	{
+	        	// 		for(int j=0; j <  current.getchilds()[i]->getkey_num(); j++)
+	        	// 		{
+	        	// 			os<<(current.getchilds()[i]->getkeys()[j])<<" ";
+	        	// 		}
+	        			
+	        	// 	}
+	        	// 	else os<<"nullptr ";
+	        	// 	os<<"||";
+	        	// 	// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+	        	// }
+	        	// // os<<"||";
+	        	// os<<std::endl;
+	        	// os<<std::endl<<"Parents: "<<std::endl;
+	        	// if (current.getparent()) 
+	        	// {
+	        	// 	// // os<<*current.getparent();
+	        	// 	for(int i = 0; i < current.getparent()->getkey_num();i++)
+	        	// 	{
+	        	// 		os<<(current.getparent()->getkeys()[i])<<std::endl;
+	        	// 	}
+	        		
+	        	// }
+	        	// else os<<std::endl<<"No parents!"<<std::endl;
+	         //    return os;
 	        }
 	};
 	template <typename KeyT,typename ValueT> 

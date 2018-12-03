@@ -33,6 +33,7 @@ namespace BPlusTreeN
 	{
 		//redirecting right and left pointers
 		Node<KeyT, ValueT> *newnode = new Node<KeyT, ValueT>(this->nodecapacity,node->getleaf());
+		// Node<KeyT, ValueT> *helpnode = node;
 		newnode->setright(node->getright());
 		if (node->getright()) node->getright()->setleft(newnode); //check if right node not nullptr
 		node->setright(newnode);
@@ -49,9 +50,23 @@ namespace BPlusTreeN
 			newnode->setkeys(i,node->getkeys()[i+nodecapacity+1]);
 			newnode->setvalues(i,node->getvalues()[i+nodecapacity+1]);
 			newnode->setchilds(i, node->getchilds()[i+nodecapacity+1]); // maybe check for leaf
+			// std::cout<<"i: "<<i<<"i+nodecapacity+1 "<<i+nodecapacity+1<<std::endl;
 		}
-		newnode->setchilds(newnode->getkey_num(), node->getchilds()[2 * nodecapacity]);//add last child
-//letter decide about what to do with children
+		newnode->setchilds(newnode->getkey_num(), node->getchilds()[2 * nodecapacity]); //add last child
+		// std::cout<<"newnode->getkey_num() "<<newnode->getkey_num()<<"2 * nodecapacity "<<2 * nodecapacity<<std::endl;
+		for (int i = 0; i <= newnode->getkey_num(); ++i)
+		{
+			if(newnode->getchilds() && newnode->getchilds()[i])
+			{
+		// 	// 	if(newnode->getchilds()[i])
+		// 	// 		std::cout<<"childs"<<std::endl;
+		// 	// 	else 
+		// 	// 		std::cout<<"no child"<<std::endl;
+		// 	// 	std::cout<<*newnode<<std::endl;
+		// 	// 	// std::cout<<*newnode->getchilds()[i]<<std::endl;
+				newnode->getchilds()[i]->setparent(newnode);
+			}
+		}
 		//if splitting node is leafe we need to add middle value to newnode values
 		if (node->getleaf()) 
 		{
@@ -67,10 +82,22 @@ namespace BPlusTreeN
 			newnode->setkeys(0, mid_key);
 			newnode->setvalues(0, mid_value);
 		}
-
+			// std::cout<<"BEFORE----------";
+			// std::cout<<"node++++";
+			// std::cout<<*node<<std::endl;
+			// std::cout<<"node----"<<std::endl;
+			// std::cout<<"WTF";
+			// if (node->getparent()) std::cout<<*(node->getparent())<<std::endl;
+			// std::cout<<"WTF"<<std::endl;
 		//if splitting node - root we need to create new one 
+		// std::cout<<node<<" "<<this->root<<" ";
 		if (node == this->root)
 		{
+			// std::cout<<std::endl;
+			// std::cout<<"---------------------"<<std::endl;
+			// std::cout<<"I was here   "<<std::cout;
+			// std::cout<<*helpnode<<std::endl;
+			// std::cout<<"---------------------"<<std::endl;
 			this->root= new Node<KeyT, ValueT>(this->nodecapacity,false);
 			//add middle key to new root node and set node and newnode as childs
 			this->root->setkeys(0, mid_key); 
@@ -81,14 +108,32 @@ namespace BPlusTreeN
 			//set parents to node and newnode
 			node->setparent(this->root);
 			newnode->setparent(this->root);
+			//mistake in photos
+
+			// for (int i = 0; i <= newnode->getkey_num(); ++i)
+			// {
+			// 	if(newnode->getchilds() && newnode->getchilds()[i])
+			// 	{
+
+			// 			// std::cout<<*(newnode->getchilds()[i]);
+			// 			(newnode->getchilds()[i])->setparent(newnode);
+			// 			// if (newnode->getchilds()[i]) std::cout<<"childs";
+			// 			// else std::cout<<"no childs";
+			// 	}
+			// }
 		}
 		else 
 		{
 			//remember node parent 
+			newnode->setparent(node->getparent()); 
 			Node<KeyT, ValueT> *helpparent = node->getparent();
 			//set to newnode the same parent
-			newnode->setparent(helpparent); 
-
+			// std::cout<<"node++++";
+			// std::cout<<*node<<std::endl;
+			// std::cout<<"node----"<<std::endl;
+			// std::cout<<"WTF";
+			// std::cout<<*helpparent<<std::endl;
+			// std::cout<<"WTF"<<std::endl;
 			//find position in parent node to insert middle
 			size_t position = 0;
 			while (position < helpparent->getkey_num() && (helpparent->getkeys() && helpparent->getkeys()[position] < mid_key))
@@ -97,6 +142,7 @@ namespace BPlusTreeN
 			for(size_t i = helpparent->getkey_num() ; i >= position +1; i--)
 			{
 				helpparent->setkeys(i, helpparent->getkeys()[i-1]);
+				helpparent->setvalues(i, helpparent->getvalues()[i-1]);
 			}
 //need to add if we at leaf and do not have childs
 			//reallocate children 
@@ -106,6 +152,7 @@ namespace BPlusTreeN
 			}
 			//insert middle key and children
 			helpparent->setkeys(position, mid_key);
+			helpparent->setvalues(position, mid_value);
 			helpparent->setchilds(position+1, newnode);
 			helpparent->setkey_num(helpparent->getkey_num()+1);
 			//split in case parrent now has more keys that allowed
@@ -363,21 +410,26 @@ template class BPlusTreeN::BPlusTree<int,int>;
 // BPlusTreeN::BPlusTree<int,int> *jk = new BPlusTreeN::BPlusTree<int,int>();
 int main()
 {
+		// Node<int, int> *ournode= new Node<int, int>(2, true);
+		// ournode->setkey_num(2);
+		// Node<int, int> *helpnode= nullptr;
+		// ournode->setchilds(0, helpnode);
+		// std::cout<<*ournode;
 		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(2);
-		ourtree->insert(27,5);
-		ourtree->insert(52,6);
-		ourtree->insert(20,7);
-		ourtree->insert(42,11);
-		ourtree->insert(93,5);
-		ourtree->insert(7,6);
-		ourtree->insert(14,7);
-		ourtree->insert(21,11);
-		ourtree->insert(34,6);
+		ourtree->insert(27,4);
+		ourtree->insert(52,8);
+		ourtree->insert(20,2);
+		ourtree->insert(42,6);
+		ourtree->insert(93,12);
+		ourtree->insert(7,0);
+		ourtree->insert(14,1);
+		ourtree->insert(21,3);
+		ourtree->insert(34,5);
 		ourtree->insert(47,7);
-		ourtree->insert(64,11);
-		// ourtree->insert(72,11);
-		// ourtree->insert(91,11);
-		// ourtree->insert(97,11);
+		ourtree->insert(64,9);
+		ourtree->insert(72,10);
+		ourtree->insert(91,11);
+		ourtree->insert(97,13);
 		ourtree->print(0,ourtree->getroot());
 		// if(ourtree->remove(2)) std::cout<<"Have to remove"<<std::endl;
 		// else std::cout<<"Dont Have to remove"<<std::endl;
