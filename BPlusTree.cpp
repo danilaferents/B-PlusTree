@@ -94,13 +94,13 @@ namespace BPlusTreeN
 			while (position < helpparent->getkey_num() && (helpparent->getkeys() && helpparent->getkeys()[position] < mid_key))
 				++position;
 			//reallocate keys 
-			for(size_t i = helpparent->getkey_num(); i >= position +1; i--)
+			for(size_t i = helpparent->getkey_num() ; i >= position +1; i--)
 			{
 				helpparent->setkeys(i, helpparent->getkeys()[i-1]);
 			}
 //need to add if we at leaf and do not have childs
 			//reallocate children 
-			for(size_t i = helpparent->getkey_num(); i >= position +2; i--)
+			for(size_t i = helpparent->getkey_num() + 1; i >= position +2; i--) //add + 1 to helpparent->getkey_num()
 			{
 				helpparent->setchilds(i, helpparent->getchilds()[i-1]);
 			}
@@ -371,10 +371,10 @@ int main()
 		ourtree->insert(93,5);
 		ourtree->insert(7,6);
 		ourtree->insert(14,7);
-		// ourtree->insert(21,11);
-		// ourtree->insert(34,6);
-		// ourtree->insert(47,7);
-		// ourtree->insert(64,11);
+		ourtree->insert(21,11);
+		ourtree->insert(34,6);
+		ourtree->insert(47,7);
+		ourtree->insert(64,11);
 		// ourtree->insert(72,11);
 		// ourtree->insert(91,11);
 		// ourtree->insert(97,11);
