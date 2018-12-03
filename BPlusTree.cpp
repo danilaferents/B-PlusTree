@@ -197,6 +197,19 @@ namespace BPlusTreeN
 		return false;
 	}
 	template <typename KeyT,typename ValueT> 
+	void BPlusTree<KeyT,ValueT>::update(Node<KeyT, ValueT>* current,const KeyT& key)
+	{
+		Node<KeyT, ValueT> *help = current->getparent();
+		if (help) 
+		{
+			size_t position = 0;
+			while(position < help->getkey_num() && help->getkeys()[position] < key) 
+				position++;
+			help->setkeys(position, key);
+		}
+
+	}
+	template <typename KeyT,typename ValueT> 
 	void BPlusTree<KeyT,ValueT>::removeinnode(Node<KeyT, ValueT>* current, const KeyT& key)
 	{
 		//check another time
@@ -225,37 +238,40 @@ namespace BPlusTreeN
 			current->setkeys(i, current->getkeys()[i+1]);
 			current->setvalues(i, current->getvalues()[i+1]);
 		}
-//***maybe loosing childs
+//***maybe loosing childs but maybe we in leafe and do not need children
 		for(size_t i = position + 1; i < current->getkey_num(); i++)//probably mistake in index
 		{
 			current->setchilds(i, current->getchilds()[i+1]);
 		}
 		current->setkey_num(current->getkey_num() - 1);
 
-
-		if (current->getkey_num() < nodecapacity - 1)
+		std::cout<<"key_num"<<current->getkey_num()<<"nodecapacity"<<nodecapacity - 1;
+		if (current->getkey_num() < nodecapacity - 1) //if we have leaf that has more than min elements than we can delete safely
 		{
 			Node<KeyT, ValueT>* right_sibling = current->getright();
 			Node<KeyT, ValueT>* left_sibling = current->getleft();
-			if (left_sibling!=nullptr && left_sibling->getkey_num() > nodecapacity - 1)
+			if (left_sibling!=nullptr && left_sibling->getkey_num() > nodecapacity - 1) //check if one of siblings has more than min elements
 			{
 				left_sibling->setkey_num(left_sibling->getkey_num()-1);
 				current->setkey_num(current->getkey_num() + 1);
-
 				//rellocate max key from leftsibling to first position in current
-//mistake in reallocating indexes
+//was mistake in reallocating indexes
+				current->setchilds(current->getkey_num(), current->getchilds()[current->getkey_num() - 1]);
 				for (int i = current->getkey_num() - 1; i > 0; --i)
 				{
 					current->setkeys(i, current->getkeys()[i-1]);
 					current->setvalues(i, current->getvalues()[i-1]);
 					current->setchilds(i, current->getchilds()[i-1]);
 				}
-				current->setchilds(current->getkey_num(), current->getchilds()[current->getkey_num() - 1]);
-//--misteke in index max key in left sibling
+				
+//was mistake in indexes
 				current->setkeys(0, left_sibling->getkeys()[left_sibling->getkey_num()]);
 				current->setvalues(0, left_sibling->getvalues()[left_sibling->getkey_num()]);
 				current->setchilds(0, left_sibling->getchilds()[left_sibling->getkey_num() + 1]);
-				//update(current);
+				
+				//maybe right update - change key to changed key
+				// current->getparent()->setkeys(0, current->getkeys()[?]);
+				update(current, current->getkeys()[0]); //?
 			} 
 			else if (right_sibling != nullptr && right_sibling->getkey_num() > nodecapacity - 1)
 			{
@@ -265,21 +281,26 @@ namespace BPlusTreeN
 				//rellocate max key from rightsibling to last position in current
 //mistake in reallocating indexes
 				
-				right_sibling->setchilds(right_sibling->getkey_num() + 1, current->getchilds()[current->getkey_num()]);
+				
 //--misteke in index max key in left sibling
 				current->setkeys(current->getkey_num() - 1, right_sibling->getkeys()[0]);
-				current->setvalues(current->getkey_num() - 1, left_sibling->getvalues()[0]);
-				current->setchilds(current->getkey_num() - 1, left_sibling->getchilds()[0]);
+				current->setvalues(current->getkey_num() - 1, right_sibling->getvalues()[0]);
+				current->setchilds(current->getkey_num(), right_sibling->getchilds()[0]);
 
+				
 				for (int i = 0; i < right_sibling->getkey_num(); --i)
 				{
 					right_sibling->setkeys(i, right_sibling->getkeys()[i+1]);
 					right_sibling->setvalues(i, right_sibling->getvalues()[i+1]);
 					right_sibling->setchilds(i, right_sibling->getchilds()[i+1]);
 				}
+				right_sibling->setchilds(right_sibling->getkey_num(),current->getchilds()[right_sibling->getkey_num() + 1]);
 				//update(current);
+				// current->getparent()->setkeys(?,current->getkeys()[current->getkey_num() - 1]);
+				//надо обновлять значения у предков чтобы они правильно укзаывали посмотреть случаи завтра
+				update(right_sibling, right_sibling->getkeys()[right_sibling->getkey_num() - 1]);
 			}
-			else 
+			else //if siblings has also min;
 			{
 				if (left_sibling != nullptr)
 				{
@@ -288,9 +309,10 @@ namespace BPlusTreeN
 						size_t leftsiblingkey_num = left_sibling->getkey_num();
 						left_sibling->setkeys(leftsiblingkey_num, current->getkeys()[i]);
 						left_sibling->setvalues(leftsiblingkey_num, current->getvalues()[i]);
-						left_sibling->setchilds(leftsiblingkey_num + 1, current->getchilds()[i]);
+						left_sibling->setchilds(leftsiblingkey_num + 1, current->getchilds()[i]); //same question about lost child but probably in leaf we do not have them
 						left_sibling->setkey_num(leftsiblingkey_num++);
 					}
+					//надо не забыть удалить вск что было в курент
 //--catch misteke index
 					left_sibling->setchilds(left_sibling->getkey_num() + 1, current->getchilds()[current->getkey_num()]);
 
@@ -299,11 +321,13 @@ namespace BPlusTreeN
 					if (current->getright()) current->getright()->setleft(left_sibling);
 
 					//update(left_sibling)
+					//надо обновить вершину и пустить удаление уже от нее
+					update(current, current->getkeys()[0]);
 					removeinnode(left_sibling->getparent(), current->getkeys()[0]); //min_key in current 
 				}
 				else 
 				{
-					for(int i = 0;i < current->getkey_num();i++)
+					for(int i = 0;i < right_sibling->getkey_num();i++)
 					{
 						size_t currentkey_num = current->getkey_num();
 						current->setkeys(currentkey_num, right_sibling->getkeys()[i]);
@@ -312,19 +336,25 @@ namespace BPlusTreeN
 						current->setkey_num(currentkey_num+=1);
 					}
 					current->setchilds(current->getkey_num() + 1, right_sibling->getchilds()[right_sibling->getkey_num()]);
-
-					//reallocating left and right pointers
+					//не забыть удалить все что было в правой
+					//reallocating left and right pointers	
 
 					current->setright(right_sibling->getright());
 					if (right_sibling->getright()) right_sibling->getright()->setleft(current);
 
 					//update(current);
+					update(current, right_sibling->getkeys()[0]);
 					removeinnode(current->getparent(), right_sibling->getkeys()[0]);
 				}	
 			} 
+			if (root->getkey_num() == 1)
+			{
+				// Node<KeyT, ValueT>* help = root->getchilds()[1];
+				root = root->getchilds()[0];
+				// root->setchilds(1, help);
+			}
 		}
-		if (root->getkey_num() == 1)
-			root = root->getchilds()[0];
+
 	}
 }
 using namespace BPlusTreeN;
@@ -334,12 +364,22 @@ template class BPlusTreeN::BPlusTree<int,int>;
 int main()
 {
 		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(2);
-		ourtree->insert(1,5);
-		ourtree->insert(2,6);
-		ourtree->insert(5,7);
-		ourtree->insert(9,11);
+		ourtree->insert(27,5);
+		ourtree->insert(52,6);
+		ourtree->insert(20,7);
+		ourtree->insert(42,11);
+		ourtree->insert(93,5);
+		ourtree->insert(7,6);
+		ourtree->insert(14,7);
+		// ourtree->insert(21,11);
+		// ourtree->insert(34,6);
+		// ourtree->insert(47,7);
+		// ourtree->insert(64,11);
+		// ourtree->insert(72,11);
+		// ourtree->insert(91,11);
+		// ourtree->insert(97,11);
 		ourtree->print(0,ourtree->getroot());
-		if(ourtree->remove(2)) std::cout<<"Have to remove"<<std::endl;
-		else std::cout<<"Dont Have to remove"<<std::endl;
-		ourtree->print(0,ourtree->getroot());
+		// if(ourtree->remove(2)) std::cout<<"Have to remove"<<std::endl;
+		// else std::cout<<"Dont Have to remove"<<std::endl;
+		// ourtree->print(0,ourtree->getroot());
 }

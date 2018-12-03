@@ -167,7 +167,7 @@ namespace BPlusTreeN
 	        	for (int i = 0; i < current.getkey_num(); ++i)
 	        	{
 	        		if(current.getkeys()) os<<current.getkeys()[i]<<" ";
-	        		if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+	        		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
 	        	}
 	        	// os<<"||";
 	        	os<<std::endl;
@@ -197,6 +197,7 @@ namespace BPlusTreeN
 			Node<KeyT,ValueT> *findtoinsert(const KeyT&);
 			void print(size_t,  Node<KeyT, ValueT>*);
 			bool remove(const KeyT&);
+			void update(Node<KeyT, ValueT>* current,const KeyT& key);
 			Node<KeyT,ValueT> *getroot()
 			{
 				return this->root;
