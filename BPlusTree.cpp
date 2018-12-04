@@ -230,13 +230,11 @@ namespace BPlusTreeN
 	bool BPlusTree<KeyT,ValueT>::remove(const KeyT& key)
 	{
 		Node<KeyT, ValueT> *current = findtoinsert(key);
-		bool ifin=false;
 		//if key in node then start delete from key else return wothin npthing to remove
 		for (int i = 0; i < current->getkey_num(); ++i)
 		{
-			if (current->getkeys()[i] == key) 
+			if (current->getkeys() && current->getkeys()[i] == key) 
 			{
-				ifin=true;
 				removeinnode(current, key);
 				return true;
 			}
@@ -244,15 +242,23 @@ namespace BPlusTreeN
 		return false;
 	}
 	template <typename KeyT,typename ValueT> 
-	void BPlusTree<KeyT,ValueT>::update(Node<KeyT, ValueT>* current,const KeyT& key)
+	void BPlusTree<KeyT,ValueT>::update(Node<KeyT, ValueT>* current,const KeyT& key, const KeyT& insertkey)
 	{
-		Node<KeyT, ValueT> *help = current->getparent();
-		if (help) 
+		// Node<KeyT, ValueT> *help = current->getparent();
+		if (current) 
 		{
-			size_t position = 0;
-			while(position < help->getkey_num() && help->getkeys()[position] < key) 
-				position++;
-			help->setkeys(position, key);
+			// size_t position = 0;
+			// while(position < current->getkey_num() && current->getkeys()[position] < key) 
+			// 	position++;
+			for (int i = 0; i < current->getkey_num(); ++i)
+			{
+				if (current->getkeys()[i] == key) 
+				{
+					current->setkeys(i, insertkey);
+					return;
+				}
+			}
+			if (current->getparent()) this->update(current->getparent(), key, insertkey);
 		}
 
 	}
@@ -271,29 +277,31 @@ namespace BPlusTreeN
 		}
 		if (!ifin) return;
 
+		// std::cout<<*current<<std::endl<<key;
+		// std::cout<<"I AM HERE"<<std::endl;
+
 		//find deleting key's position
 		size_t position = 0;
-		while(position < current->getkey_num() && current->getkeys()[position] < key)
+		while(position < current->getkey_num() && current->getkeys() && current->getkeys()[position] < key)
 			position++;
-
-		// std::cout<<position;
+		// std::cout<<position<<std::endl;
 
 		//delete key
-//----------------
-		for(size_t i = position; i < current->getkey_num()-1; i++)//probably mistake in index
+		for(size_t i = position; i < current->getkey_num() - 1; i++)
 		{
 			current->setkeys(i, current->getkeys()[i+1]);
 			current->setvalues(i, current->getvalues()[i+1]);
+			// std::cout<<" i "<<i<<" "<<current->getkeys()[i]<<" i+1: "<<i+ 1<<" "<<current->getkeys()[i+1]<<std::endl;
 		}
-//***maybe loosing childs but maybe we in leafe and do not need children
-		for(size_t i = position + 1; i < current->getkey_num(); i++)//probably mistake in index
+//*** if we in leafe and do not need children so else lets see
+		for(size_t i = position + 1; i < current->getkey_num(); i++)
 		{
 			current->setchilds(i, current->getchilds()[i+1]);
 		}
 		current->setkey_num(current->getkey_num() - 1);
-
-		std::cout<<"key_num"<<current->getkey_num()<<"nodecapacity"<<nodecapacity - 1;
-		if (current->getkey_num() < nodecapacity - 1) //if we have leaf that has more than min elements than we can delete safely
+		update(current->getparent(), key, current->getkeys()[position]);
+		// std::cout<<"key_num"<<current->getkey_num()<<"nodecapacity"<<nodecapacity - 1;
+		if (current->getkey_num() < nodecapacity - 1) //check if we have min elements as if we have leaf that has more than min elements than we can delete safely 
 		{
 			Node<KeyT, ValueT>* right_sibling = current->getright();
 			Node<KeyT, ValueT>* left_sibling = current->getleft();
@@ -302,23 +310,24 @@ namespace BPlusTreeN
 				left_sibling->setkey_num(left_sibling->getkey_num()-1);
 				current->setkey_num(current->getkey_num() + 1);
 				//rellocate max key from leftsibling to first position in current
-//was mistake in reallocating indexes
 				current->setchilds(current->getkey_num(), current->getchilds()[current->getkey_num() - 1]);
-				for (int i = current->getkey_num() - 1; i > 0; --i)
+				for (int i = position; i > 0; --i)
 				{
 					current->setkeys(i, current->getkeys()[i-1]);
 					current->setvalues(i, current->getvalues()[i-1]);
+// --check childs
 					current->setchilds(i, current->getchilds()[i-1]);
 				}
 				
 //was mistake in indexes
 				current->setkeys(0, left_sibling->getkeys()[left_sibling->getkey_num()]);
 				current->setvalues(0, left_sibling->getvalues()[left_sibling->getkey_num()]);
+// --check childs
 				current->setchilds(0, left_sibling->getchilds()[left_sibling->getkey_num() + 1]);
 				
 				//maybe right update - change key to changed key
 				// current->getparent()->setkeys(0, current->getkeys()[?]);
-				update(current, current->getkeys()[0]); //?
+				update(current->getparent(), key,current->getkeys()[0]); 
 			} 
 			else if (right_sibling != nullptr && right_sibling->getkey_num() > nodecapacity - 1)
 			{
@@ -334,18 +343,19 @@ namespace BPlusTreeN
 				current->setvalues(current->getkey_num() - 1, right_sibling->getvalues()[0]);
 				current->setchilds(current->getkey_num(), right_sibling->getchilds()[0]);
 
-				
-				for (int i = 0; i < right_sibling->getkey_num(); --i)
+
+				for (int i = 0; i < right_sibling->getkey_num(); ++i)
 				{
 					right_sibling->setkeys(i, right_sibling->getkeys()[i+1]);
 					right_sibling->setvalues(i, right_sibling->getvalues()[i+1]);
 					right_sibling->setchilds(i, right_sibling->getchilds()[i+1]);
 				}
 				right_sibling->setchilds(right_sibling->getkey_num(),current->getchilds()[right_sibling->getkey_num() + 1]);
-				//update(current);
+				
 				// current->getparent()->setkeys(?,current->getkeys()[current->getkey_num() - 1]);
 				//надо обновлять значения у предков чтобы они правильно укзаывали посмотреть случаи завтра
-				update(right_sibling, right_sibling->getkeys()[right_sibling->getkey_num() - 1]);
+				update(right_sibling, current->getkeys()[current->getkey_num() - 1], right_sibling->getkeys()[0]);
+				update(current, key, current->getkeys()[0]);
 			}
 			else //if siblings has also min;
 			{
@@ -369,7 +379,7 @@ namespace BPlusTreeN
 
 					//update(left_sibling)
 					//надо обновить вершину и пустить удаление уже от нее
-					update(current, current->getkeys()[0]);
+					// update(current, current->getkeys()[0]);
 					removeinnode(left_sibling->getparent(), current->getkeys()[0]); //min_key in current 
 				}
 				else 
@@ -390,16 +400,16 @@ namespace BPlusTreeN
 					if (right_sibling->getright()) right_sibling->getright()->setleft(current);
 
 					//update(current);
-					update(current, right_sibling->getkeys()[0]);
+					// update(current, right_sibling->getkeys()[0]);
 					removeinnode(current->getparent(), right_sibling->getkeys()[0]);
 				}	
 			} 
-			if (root->getkey_num() == 1)
-			{
-				// Node<KeyT, ValueT>* help = root->getchilds()[1];
-				root = root->getchilds()[0];
-				// root->setchilds(1, help);
-			}
+			// if (root->getkey_num() == 1)
+			// {
+			// 	// Node<KeyT, ValueT>* help = root->getchilds()[1];
+			// 	root = root->getchilds()[0];
+			// 	// root->setchilds(1, help);
+			// }
 		}
 
 	}
@@ -415,23 +425,73 @@ int main()
 		// Node<int, int> *helpnode= nullptr;
 		// ournode->setchilds(0, helpnode);
 		// std::cout<<*ournode;
-		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(2);
-		ourtree->insert(27,4);
-		ourtree->insert(52,8);
-		ourtree->insert(20,2);
-		ourtree->insert(42,6);
-		ourtree->insert(93,12);
-		ourtree->insert(7,0);
-		ourtree->insert(14,1);
-		ourtree->insert(21,3);
-		ourtree->insert(34,5);
-		ourtree->insert(47,7);
-		ourtree->insert(64,9);
-		ourtree->insert(72,10);
-		ourtree->insert(91,11);
-		ourtree->insert(97,13);
-		ourtree->print(0,ourtree->getroot());
-		// if(ourtree->remove(2)) std::cout<<"Have to remove"<<std::endl;
-		// else std::cout<<"Dont Have to remove"<<std::endl;
+
+
+
+		// BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(2);
+		// ourtree->insert(27,4);
+		// ourtree->insert(52,8);
+		// ourtree->insert(20,2);
+		// ourtree->insert(42,6);
+		// ourtree->insert(93,12);
+		// ourtree->insert(7,0);
+		// ourtree->insert(14,1);
+		// ourtree->insert(21,3);
+		// ourtree->insert(34,5);
+		// ourtree->insert(47,7);
+		// ourtree->insert(64,9);
+		// ourtree->insert(72,10);
+		// ourtree->insert(91,11);
+		// ourtree->insert(97,13);
 		// ourtree->print(0,ourtree->getroot());
+
+
+		//test for deleting key and borrow key from left sibling 
+		//  BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(2);
+		// ourtree->insert(8,4);
+		// ourtree->insert(9,8);
+		// ourtree->insert(11,2);
+		// ourtree->insert(15,6);
+		// ourtree->insert(17,12);
+		// ourtree->insert(18,0);
+		// ourtree->insert(22,1);
+		// ourtree->insert(23,3);
+		// ourtree->insert(24,5);
+		// ourtree->insert(25,555);
+		// ourtree->insert(26,666);
+		// ourtree->insert(28,888);
+		// ourtree->print(0,ourtree->getroot());
+		// std::cout<<"-------NEW TREE!!!---------"<<std::endl;
+		// if(ourtree->remove(24)) std::cout<<"Have to remove"<<std::endl;
+		// ourtree->print(0,ourtree->getroot());
+		// std::cout<<"-------NEW TREE!!!---------"<<std::endl;
+		// if(ourtree->remove(25)) std::cout<<"Have to remove"<<std::endl;
+		// ourtree->print(0,ourtree->getroot());
+
+
+		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(2);
+		ourtree->insert(8,4);
+		ourtree->insert(9,8);
+		ourtree->insert(11,2);
+		ourtree->insert(15,6);
+		ourtree->insert(17,12);
+		ourtree->insert(18,0);
+		ourtree->insert(22,1);
+		ourtree->insert(23,3);
+		ourtree->insert(24,5);
+		ourtree->insert(25,555);
+		ourtree->insert(26,666);
+		ourtree->insert(28,888);
+		// ourtree->print(0,ourtree->getroot());
+		// std::cout<<"-------NEW TREE!!!---------"<<std::endl;
+		if(ourtree->remove(9)) std::cout<<"Have to remove"<<std::endl;
+		ourtree->print(0,ourtree->getroot());
+		std::cout<<"-------NEW TREE!!!---------"<<std::endl;
+		if(ourtree->remove(15)) std::cout<<"Have to remove"<<std::endl;
+		ourtree->print(0,ourtree->getroot());
+		std::cout<<"-------NEW TREE!!!---------"<<std::endl;
+		if(ourtree->remove(11)) std::cout<<"Have to remove"<<std::endl;
+		ourtree->print(0,ourtree->getroot());
+		
+
 }

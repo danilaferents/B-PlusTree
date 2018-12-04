@@ -76,6 +76,7 @@ namespace
 		}
 		delete ourtree;
 	}
+
 	TEST(TestsBinarySearchTree,TestIntersection2)
     {
 		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(2);
@@ -114,6 +115,52 @@ namespace
 				}
 			}
 		}
+		delete ourtree;
+	}
+	TEST(TestsBinarySearchTree,TestIntersection3)
+    {
+		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(2);
+		ourtree->insert(27,4);
+		ourtree->insert(52,8);
+		ourtree->insert(20,2);
+		ourtree->insert(42,6);
+		ourtree->insert(93,12);
+		ourtree->insert(7,0);
+		ourtree->insert(14,1);
+		ourtree->insert(21,3);
+		ourtree->insert(34,5);
+		ourtree->insert(47,7);
+		ourtree->insert(64,9);
+		ourtree->insert(72,10);
+		ourtree->insert(91,11);
+		ourtree->insert(97,13);
+		ourtree->print(0,ourtree->getroot());
+		std::vector<int> answersk={42,20,27,7,14,7,15,18,19,25};
+		std::vector<int> answersv={6,0,666,6,11,3,9,15,55,24};
+		size_t k=0;
+		// ASSERT_EQ((ourtree->getroot()->getkeys())[0], answersk[k]);
+		// ASSERT_EQ((ourtree->getroot()->getvalues())[0], answersv[k]);
+		// k++;
+		// for (int i = 0; i < ourtree->getroot()->getkey_num(); ++i)
+		// {
+		// 	ASSERT_EQ((ourtree->getroot()->getkeys())[i], answersk[k]);
+		// 	k++;
+		// }
+		// for (int i = 0; i <=ourtree->getroot()->getkey_num(); ++i)
+		// {
+		// 	if((ourtree->getroot()->getchilds()[i])) 
+		// 	{
+		// 		for (int j = 0; j < ourtree->getroot()->getchilds()[i]->getkey_num(); ++j)
+		// 		{
+		// 			if (ourtree->getroot()->getchilds()[i]->getkeys()) 
+		// 			{
+		// 				ASSERT_EQ(((ourtree->getroot()->getchilds()[i]->getkeys())[j]), answersk[k]);
+		// 				if(ourtree->getroot()->getchilds()[i]->getleaf()) ASSERT_EQ(((ourtree->getroot()->getchilds()[i]->getvalues())[j]), answersv[k]);
+		// 				k++;
+		// 			}
+		// 		}
+		// 	}
+		// }
 		delete ourtree;
 	}
 }
