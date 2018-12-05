@@ -171,64 +171,64 @@ namespace BPlusTreeN
 	        		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
 	        	}
 	        	os<<std::endl;
-	        	if (current.leaf)
-	        	{
-		        	os<<std::endl<<"Left Sibling: "<<std::endl;
-		        	if (current.left) 
-		        	{
-		        		for (int i = 0; i < current.getleft()->getkey_num(); ++i)
-			        	{
-			        		if(current.getleft()->getleaf() && current.getleft()->getkeys()) os<<current.getleft()->getkeys()[i]<<" ";
-			        		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
-			        	}
-		        	}
-		        	else os<<"nullptr"<<std::endl;
-		        	os<<std::endl<<"Right Sibling: "<<std::endl;
-		        	if (current.right) 
-		        	{
-		        		for (int i = 0; i < current.getright()->getkey_num(); ++i)
-			        	{
-			        		if(current.getright()->getleaf() && current.getright()->getkeys()) os<<current.getright()->getkeys()[i]<<" ";
-			        		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
-			        	}
-		        	}
-		        	else os<<"nullptr"<<std::endl;
+	        	// if (current.leaf)
+	        	// {
+		        // 	os<<std::endl<<"Left Sibling: "<<std::endl;
+		        // 	if (current.left) 
+		        // 	{
+		        // 		for (int i = 0; i < current.getleft()->getkey_num(); ++i)
+			       //  	{
+			       //  		if(current.getleft()->getleaf() && current.getleft()->getkeys()) os<<current.getleft()->getkeys()[i]<<" ";
+			       //  		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+			       //  	}
+		        // 	}
+		        // 	else os<<"nullptr"<<std::endl;
+		        // 	os<<std::endl<<"Right Sibling: "<<std::endl;
+		        // 	if (current.right) 
+		        // 	{
+		        // 		for (int i = 0; i < current.getright()->getkey_num(); ++i)
+			       //  	{
+			       //  		if(current.getright()->getleaf() && current.getright()->getkeys()) os<<current.getright()->getkeys()[i]<<" ";
+			       //  		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+			       //  	}
+		        // 	}
+		        // 	else os<<"nullptr"<<std::endl;
 	        		
-		        	os<<std::endl<<"Values:"<<std::endl;
-		        	for (int i = 0; i < current.getkey_num(); ++i)
-		        	{
-		        		if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
-		        		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
-		        	}
-	        	}
-	        	os<<std::endl<<"Children: "<<std::endl;
-	        	for (int i = 0; i <= current.getkey_num(); ++i)
-	        	{
-	        		if(current.getchilds() && current.getchilds()[i]) 
-	        		{
-	        			for(int j=0; j <  current.getchilds()[i]->getkey_num(); j++)
-	        			{
-	        				os<<(current.getchilds()[i]->getkeys()[j])<<" ";
-	        			}
+		        // 	os<<std::endl<<"Values:"<<std::endl;
+		        // 	for (int i = 0; i < current.getkey_num(); ++i)
+		        // 	{
+		        // 		if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+		        // 		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+		        // 	}
+	        	// }
+	        	// os<<std::endl<<"Children: "<<std::endl;
+	        	// for (int i = 0; i <= current.getkey_num(); ++i)
+	        	// {
+	        	// 	if(current.getchilds() && current.getchilds()[i]) 
+	        	// 	{
+	        	// 		for(int j=0; j <  current.getchilds()[i]->getkey_num(); j++)
+	        	// 		{
+	        	// 			os<<(current.getchilds()[i]->getkeys()[j])<<" ";
+	        	// 		}
 	        			
-	        		}
-	        		else os<<"nullptr ";
-	        		os<<"||";
-	        	// 	// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
-	        	}
-	        	os<<std::endl<<"Parents: "<<std::endl;
-	        	if (current.getparent()) 
-	        	{
-	        		// // os<<*current.getparent();
-	        		for(int i = 0; i < current.getparent()->getkey_num();i++)
-	        		{
-	        			os<<(current.getparent()->getkeys()[i])<<" ";
-	        		}
+	        	// 	}
+	        	// 	else os<<"nullptr ";
+	        	// 	os<<"||";
+	        	// // 	// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+	        	// }
+	        	// os<<std::endl<<"Parents: "<<std::endl;
+	        	// if (current.getparent()) 
+	        	// {
+	        	// 	// // os<<*current.getparent();
+	        	// 	for(int i = 0; i < current.getparent()->getkey_num();i++)
+	        	// 	{
+	        	// 		os<<(current.getparent()->getkeys()[i])<<" ";
+	        	// 	}
 	        		
-	        	}
-	        	else os<<"nullptr"<<std::endl;
-	        	os<<std::endl;
-	        	// else os<<std::endl<<"No parents!"<<std::endl;
+	        	// }
+	        	// else os<<"nullptr"<<std::endl;
+	        	// os<<std::endl;
+	        	// // else os<<std::endl<<"No parents!"<<std::endl;
 	            return os;
 	        }
 	};
@@ -255,7 +255,7 @@ namespace BPlusTreeN
 			Node<KeyT,ValueT> *findtoinsert(const KeyT&);
 			void print(size_t,  Node<KeyT, ValueT>*);
 			bool remove(const KeyT&);
-			void update(Node<KeyT, ValueT>* current,const KeyT& key,const KeyT& insertkey);
+			void update(Node<KeyT, ValueT>* current,const KeyT key,const KeyT insertkey);
 			Node<KeyT,ValueT> *getroot()
 			{
 				return this->root;
@@ -267,7 +267,7 @@ namespace BPlusTreeN
 	    private:
 	    	int nodecapacity;
 	    	Node<KeyT,ValueT> *root;
-	    	void removeinnode(Node<KeyT, ValueT>*, const KeyT& key);
+	    	void removeinnode(Node<KeyT, ValueT>*, const KeyT, const size_t);
 	    	// void initializeNode(Node<KeyT,ValueT>*);
 	  //   	void freeNode(Node<KeyT,ValueT>);
 			// };
