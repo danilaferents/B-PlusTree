@@ -171,14 +171,13 @@ namespace BPlusTreeN
 	        		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
 	        	}
 	        	os<<std::endl;
-	        	// if (current.leaf)
-	        	// {
+	        	
 		        // 	os<<std::endl<<"Left Sibling: "<<std::endl;
 		        // 	if (current.left) 
 		        // 	{
 		        // 		for (int i = 0; i < current.getleft()->getkey_num(); ++i)
 			       //  	{
-			       //  		if(current.getleft()->getleaf() && current.getleft()->getkeys()) os<<current.getleft()->getkeys()[i]<<" ";
+			       //  		if( current.getleft()->getkeys()) os<<current.getleft()->getkeys()[i]<<" ";
 			       //  		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
 			       //  	}
 		        // 	}
@@ -188,16 +187,17 @@ namespace BPlusTreeN
 		        // 	{
 		        // 		for (int i = 0; i < current.getright()->getkey_num(); ++i)
 			       //  	{
-			       //  		if(current.getright()->getleaf() && current.getright()->getkeys()) os<<current.getright()->getkeys()[i]<<" ";
+			       //  		if( current.getright()->getkeys()) os<<current.getright()->getkeys()[i]<<" ";
 			       //  		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
 			       //  	}
 		        // 	}
 		        // 	else os<<"nullptr"<<std::endl;
-	        		
+	        	// if (current.leaf)
+	        	// {	
 		        // 	os<<std::endl<<"Values:"<<std::endl;
 		        // 	for (int i = 0; i < current.getkey_num(); ++i)
 		        // 	{
-		        // 		if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+		        // 		if(current.getvalues()) os<<current.getvalues()[i]<<" ";
 		        // 		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
 		        // 	}
 	        	// }
@@ -228,7 +228,7 @@ namespace BPlusTreeN
 	        	// }
 	        	// else os<<"nullptr"<<std::endl;
 	        	// os<<std::endl;
-	        	// // else os<<std::endl<<"No parents!"<<std::endl;
+	        	// else os<<std::endl<<"No parents!"<<std::endl;
 	            return os;
 	        }
 	};
@@ -256,6 +256,8 @@ namespace BPlusTreeN
 			void print(size_t,  Node<KeyT, ValueT>*);
 			bool remove(const KeyT&);
 			void update(Node<KeyT, ValueT>* current,const KeyT key,const KeyT insertkey);
+			KeyT minimumkey(Node<KeyT, ValueT>* current);
+			void updateall(Node<KeyT, ValueT>* current);
 			Node<KeyT,ValueT> *getroot()
 			{
 				return this->root;
