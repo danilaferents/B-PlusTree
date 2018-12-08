@@ -21,6 +21,7 @@ namespace BPlusTreeN
 			KeyT *keys;
 			Node *parent;
 			Node **childs;
+			bool *deads;
 			ValueT *values;
 			Node *left;
 			Node *right;
@@ -30,6 +31,11 @@ namespace BPlusTreeN
 				leaf=ourbool;
 				key_num=0;
 				keys=new KeyT[2*capacity];
+				deads=new bool[2*capacity];
+				for(size_t i; i < 2*capacity; i++)
+				{
+					deads[i] = false;
+				}
 				// for (int i = 0; i < 2*capacity; ++i)
 				// {
 				// 	keys[i]=0;
@@ -46,38 +52,35 @@ namespace BPlusTreeN
 			}
 			~Node()
 			{
-				if (keys) delete [] keys;
-				if (values) delete [] values;
-				if (!leaf)
-				{
-					for (int i = 0; i <=key_num; ++i)
-					{
-						if(childs && childs[i]) delete childs[i];
-					}
-					delete [] childs;
-				}
-				else 
-				{
-					delete [] childs;
-				}
-				
+				if (keys) delete[] keys;
+				keys = nullptr;
+				if(values) delete[] values;
+				values = nullptr;
+				if (childs) delete[] childs;
+				childs = nullptr;
+				if (deads) delete[] deads;
 			}
-			// Node(const size_t &capacity,const bool &ourbool,const KeyT& key, const ValueT& value)
+			// void freeNode()
 			// {
-			// 	leaf=ourbool;
-			// 	key_num=1;
-			// 	keys=new KeyT(2*capacity);
-			// 	keys[0] = key;
-			// 	parent=nullptr;
-			// 	childs=new Node<KeyT,ValueT>*[2*capacity];
-			// 	for (int i = 0; i <=2*capacity; ++i)
+			// 	// std::cout<<"1 ";
+			// 	delete [] keys;
+			// 	keys = nullptr;
+			// 	delete [] values;
+			// 	values = nullptr;
+			// 	delete [] childs;
+			// 	childs = nullptr;
+			// 	if (!leaf)
 			// 	{
-			// 		childs[i]=nullptr;
+			// 		for (int i = 0; i <=key_num; ++i)
+			// 		{
+			// 			if(childs && childs[i]) delete childs[i];
+			// 		}
+			// 		delete [] childs;
 			// 	}
-			// 	left=nullptr;
-			// 	right=nullptr;
-			// 	values=new ValueT(2*capacity);
-			// 	values[0] = value;
+			// 	else 
+			// 	{
+			// 		delete [] childs;
+			// 	}
 			// }
 			bool iskeyinnode(const KeyT& findkey)
 			{
@@ -119,6 +122,15 @@ namespace BPlusTreeN
 			{
 				if(this->parent) return this->parent;
 				return nullptr;
+			}
+			bool* getdeads()
+			{
+				if(this->deads) return this->deads;
+				return nullptr;
+			}
+			void setdeads(const size_t& index, const bool& insertbool)
+			{
+				if (this->deads) this->deads[index] = insertbool;
 			}
 			void setparent(Node* currentparent)
 			{
@@ -172,63 +184,62 @@ namespace BPlusTreeN
 	        	}
 	        	os<<std::endl;
 	        	
-		        // 	os<<std::endl<<"Left Sibling: "<<std::endl;
-		        // 	if (current.left) 
-		        // 	{
-		        // 		for (int i = 0; i < current.getleft()->getkey_num(); ++i)
-			       //  	{
-			       //  		if( current.getleft()->getkeys()) os<<current.getleft()->getkeys()[i]<<" ";
-			       //  		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
-			       //  	}
-		        // 	}
-		        // 	else os<<"nullptr"<<std::endl;
-		        // 	os<<std::endl<<"Right Sibling: "<<std::endl;
-		        // 	if (current.right) 
-		        // 	{
-		        // 		for (int i = 0; i < current.getright()->getkey_num(); ++i)
-			       //  	{
-			       //  		if( current.getright()->getkeys()) os<<current.getright()->getkeys()[i]<<" ";
-			       //  		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
-			       //  	}
-		        // 	}
-		        // 	else os<<"nullptr"<<std::endl;
-	        	// if (current.leaf)
-	        	// {	
-		        // 	os<<std::endl<<"Values:"<<std::endl;
-		        // 	for (int i = 0; i < current.getkey_num(); ++i)
-		        // 	{
-		        // 		if(current.getvalues()) os<<current.getvalues()[i]<<" ";
-		        // 		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
-		        // 	}
-	        	// }
-	        	// os<<std::endl<<"Children: "<<std::endl;
-	        	// for (int i = 0; i <= current.getkey_num(); ++i)
-	        	// {
-	        	// 	if(current.getchilds() && current.getchilds()[i]) 
-	        	// 	{
-	        	// 		for(int j=0; j <  current.getchilds()[i]->getkey_num(); j++)
-	        	// 		{
-	        	// 			os<<(current.getchilds()[i]->getkeys()[j])<<" ";
-	        	// 		}
+		        	os<<std::endl<<"Left Sibling: "<<std::endl;
+		        	if (current.left) 
+		        	{
+		        		for (int i = 0; i < current.getleft()->getkey_num(); ++i)
+			        	{
+			        		if( current.getleft()->getkeys()) os<<current.getleft()->getkeys()[i]<<" ";
+			        		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+			        	}
+		        	}
+		        	else os<<"nullptr"<<std::endl;
+		        	os<<std::endl<<"Right Sibling: "<<std::endl;
+		        	if (current.right) 
+		        	{
+		        		for (int i = 0; i < current.getright()->getkey_num(); ++i)
+			        	{
+			        		if( current.getright()->getkeys()) os<<current.getright()->getkeys()[i]<<" ";
+			        		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+			        	}
+		        	}
+		        	else os<<"nullptr"<<std::endl;
+	        	if (current.leaf)
+	        	{	
+		        	os<<std::endl<<"Values:"<<std::endl;
+		        	for (int i = 0; i < current.getkey_num(); ++i)
+		        	{
+		        		if(current.getvalues()) os<<current.getvalues()[i]<<" ";
+		        		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+		        	}
+	        	}
+	        	os<<std::endl<<"Children: "<<std::endl;
+	        	for (int i = 0; i <= current.getkey_num(); ++i)
+	        	{
+	        		if(current.getchilds() && current.getchilds()[i]) 
+	        		{
+	        			for(int j=0; j <  current.getchilds()[i]->getkey_num(); j++)
+	        			{
+	        				os<<(current.getchilds()[i]->getkeys()[j])<<" ";
+	        			}
 	        			
-	        	// 	}
-	        	// 	else os<<"nullptr ";
-	        	// 	os<<"||";
-	        	// // 	// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
-	        	// }
-	        	// os<<std::endl<<"Parents: "<<std::endl;
-	        	// if (current.getparent()) 
-	        	// {
-	        	// 	// // os<<*current.getparent();
-	        	// 	for(int i = 0; i < current.getparent()->getkey_num();i++)
-	        	// 	{
-	        	// 		os<<(current.getparent()->getkeys()[i])<<" ";
-	        	// 	}
+	        		}
+	        		else os<<"nullptr ";
+	        		os<<"||";
+	        	// 	// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
+	        	}
+	        	os<<std::endl<<"Parents: "<<std::endl;
+	        	if (current.getparent()) 
+	        	{
+	        		// // os<<*current.getparent();
+	        		for(int i = 0; i < current.getparent()->getkey_num();i++)
+	        		{
+	        			os<<(current.getparent()->getkeys()[i])<<" ";
+	        		}
 	        		
-	        	// }
-	        	// else os<<"nullptr"<<std::endl;
-	        	// os<<std::endl;
-	        	// else os<<std::endl<<"No parents!"<<std::endl;
+	        	}
+	        	else os<<"nullptr"<<std::endl;
+	        
 	            return os;
 	        }
 	};
@@ -243,7 +254,21 @@ namespace BPlusTreeN
 			}
 			~BPlusTree()
 			{
-				delete root;
+				Node<KeyT, ValueT>* helpcurrent = root;
+				Node<KeyT, ValueT>* helpnode = root->getchilds()[0];
+				while(helpcurrent)
+				{
+					if (helpcurrent) helpnode = helpcurrent->getchilds()[0];
+					while(helpcurrent)
+					{
+						delete helpcurrent;
+						helpcurrent = helpcurrent->getright();
+					}
+					helpcurrent = helpnode;
+				}
+				// root->freeNode();
+				// delete root;
+				// root = nullptr;
 			}
 			// BPlusTree(const size_t& ourcapacity,Node<KeyT, ValueT>* ourroot)
 			// {
