@@ -191,9 +191,13 @@ namespace BPlusTreeN
 	template <typename KeyT,typename ValueT> 
 	void  BPlusTree<KeyT,ValueT>::currentdeletedinsert(Node<KeyT, ValueT>* current,const KeyT& key,const ValueT& value)
 	{
+		// std::cout<<current->getkey_num()<<"   ";
 		size_t position = 0;
-		while(position < current->getkey_num() && (current->getkeys() && current->getkeys()[position] < key))
+		while(position < current->getkey_num() && (current->getkeys() && current->getkeys()[position] <= key))
 			position++;
+		position--;
+		// std::cout<<position<<": position  ";
+		if (position == -1) return;
 		if(current->getdeads()[position])
 		{
 			current->setkeys(position, key);
@@ -212,6 +216,7 @@ namespace BPlusTreeN
 				break;
 			}
 		}
+		// std::cout<<leftposition<<": leftposition  ";
 		if(checkleft)
 		{
 			for (int i = leftposition; i < position; ++i)
@@ -237,6 +242,7 @@ namespace BPlusTreeN
 				break;
 			}
 		}
+		// std::cout<<rightposition<<": rightposition  ";
 		if(checkright)
 		{
 			for (int i = rightposition; i > position; --i)
@@ -256,11 +262,12 @@ namespace BPlusTreeN
 	{
 		if (root == nullptr) return insert(key, value);
 		Node<KeyT, ValueT>* curleaf = findtoinsert(key);
+		// std::cout<<*curleaf;
 		if(curleaf->getkey_num() < (2 * nodecapacity - 1))
 		{
+			// std::cout<<"I was he*/re";
 			return insert(key, value); 
 		}
-
 		bool check= false;
 		for (int i = 0; i < curleaf->getkey_num(); ++i)
 		{
@@ -270,11 +277,15 @@ namespace BPlusTreeN
 				break;
 			}
 		}
-		if(check) currentdeletedinsert(curleaf, key, value);
+		if(check) 
+		{
+			currentdeletedinsert(curleaf, key, value);
+			return true;
+		}
 		size_t position = 0;
 		while(position < curleaf->getkey_num() && (curleaf->getkeys() && curleaf->getkeys()[position] < key))
 			position++;
-
+		// std::cout<<position<<"  ";
 		Node<KeyT, ValueT>* right_sibling = curleaf->getright();
 		Node<KeyT, ValueT>* left_sibling = curleaf->getleft();
 		size_t rightpos = 0;
@@ -329,8 +340,10 @@ namespace BPlusTreeN
 	template <typename KeyT,typename ValueT> 
 	void BPlusTree<KeyT,ValueT>::lazyinserttoleftsiblings(Node<KeyT, ValueT>* current, Node<KeyT, ValueT>* left, size_t position, const KeyT& key, const ValueT& value, const bool dead)
 	{
+		// std::cout<<"I was here";
 		if (current->getkey_num() < 2*nodecapacity - 1)
 		{
+			// std::cout<<"position"<<position;
 			current->setkeys(position, key);
 			current->setdeads(position, dead);
 			current->setvalues(position, value);
@@ -349,10 +362,11 @@ namespace BPlusTreeN
 		current->setkeys(position - 1, key);
 		current->setdeads(position - 1, dead);
 		current->setvalues(position - 1, value);
-		updateall(current);
+		
 		Node<KeyT, ValueT>* helpcurrent = current->getleft();
 		if(current != left)
 			lazyinserttoleftsiblings(helpcurrent, left, helpcurrent->getkey_num(), helpkey, helpvalue, helpdead);
+		updateall(current);
 	}
 	template <typename KeyT,typename ValueT> 
 	void BPlusTree<KeyT,ValueT>::lazyinserttorightsiblings(Node<KeyT, ValueT>* current, Node<KeyT, ValueT>* right, size_t position, const KeyT& key, const ValueT& value, const bool dead)
@@ -380,13 +394,19 @@ namespace BPlusTreeN
 			current->setdeads(i, current->getdeads()[i-1]);
 			current->setvalues(i, current->getvalues()[i-1]);
 		}
-		current->setkeys(position, helpkey);
-		current->setvalues(position,  helpvalue);
-		current->setdeads(position, helpdead);
-		updateall(current);
 		Node<KeyT, ValueT>* helpcurrent = current->getright();
-		if(current!= right)
-			lazyinserttorightsiblings(helpcurrent, right, 0, helpkey, helpvalue, helpdead);
+		if(key < current->getkeys()[current->getkey_num() - 1])
+		{
+			//because we can have more then 2 nodecapacity - 1 keys
+			current->setkeys(position, key);
+			current->setvalues(position,  value);
+			current->setdeads(position, dead);
+			if(current!= right)
+				lazyinserttorightsiblings(helpcurrent, right, 0, helpkey, helpvalue, helpdead);
+			
+		} else 
+		lazyinserttorightsiblings(helpcurrent, right, 0 , key, value, dead);
+		updateall(current);
 	}
 	template <typename KeyT,typename ValueT> 
 	void BPlusTree<KeyT,ValueT>::print(size_t k, Node<KeyT, ValueT>* curleaf)
@@ -473,6 +493,22 @@ namespace BPlusTreeN
 
 	}
 	template <typename KeyT,typename ValueT> 
+	void BPlusTree<KeyT,ValueT>::updatenow(Node<KeyT, ValueT>* current)
+	{
+		while(current)
+		{
+			for (int i = 0; i < current->getkey_num(); ++i)
+			{
+				if (current->getchilds()[i+1])
+				{
+					current->setkeys(i, minimumkey(current->getchilds()[i+1]));
+				}
+			}
+			current = current->getparent();
+		}
+
+	}
+	template <typename KeyT,typename ValueT> 
 	KeyT BPlusTree<KeyT,ValueT>::minimumkey(Node<KeyT, ValueT>* current)
 	{
 		KeyT helpkey = current->getkeys()[0];
@@ -486,7 +522,6 @@ namespace BPlusTreeN
 	template <typename KeyT,typename ValueT> 
 	void BPlusTree<KeyT,ValueT>::removeinnode(Node<KeyT, ValueT>* current, const KeyT key, const size_t flag)
 	{
-
 		//check another time
 		bool ifin=false;
 		for (int i = 0; i < current->getkey_num(); ++i)
@@ -513,7 +548,6 @@ namespace BPlusTreeN
 			// std::cout<<" i "<<i<<" "<<current->getkeys()[i]<<" i+1: "<<i+ 1<<" "<<current->getkeys()[i+1]<<std::endl;
 		}
 
-//*** if we in leafe and do not need children so else lets see
 		if (flag)
 		{
 			for(size_t i = position + 1; i < current->getkey_num(); i++)
@@ -533,7 +567,7 @@ namespace BPlusTreeN
 		}
 
 		current->setkey_num(current->getkey_num() - 1);
-
+		// updateall(current);
 		if (current->getkey_num() < nodecapacity - 1) //check if we have min elements as if we have leaf that has more than min elements than we can delete safely 
 		{
 			Node<KeyT, ValueT>* right_sibling = current->getright();
@@ -602,7 +636,7 @@ namespace BPlusTreeN
 						left_sibling->setkey_num(leftsiblingkey_num+=1);
 					}
 
-					if(current->getchilds()[current->getkey_num()])
+					if(!current->getleaf() && current->getchilds()[current->getkey_num()])
 					{
 						left_sibling->setchilds(left_sibling->getkey_num() + 1, current->getchilds()[current->getkey_num()]);
 						left_sibling->setkey_num(left_sibling->getkey_num() + 1);
@@ -704,22 +738,182 @@ namespace BPlusTreeN
 				}
 			}
 	}
+	template <typename KeyT,typename ValueT> 
+	void BPlusTree<KeyT,ValueT>::fix()
+	{
+		if (root == nullptr) return;
+		Node<KeyT, ValueT>* helptogo = root;
+		std::vector<KeyT> k;
+		std::vector<ValueT> v;
+		while(helptogo->getchilds()[0])
+		{
+			helptogo = helptogo->getchilds()[0];
+		}
+
+		while(helptogo)
+		{
+			size_t cup = 0;
+			for (int i = 0; i < helptogo->getkey_num(); ++i)
+			{
+				if(!helptogo->getdeads()[i])
+				{
+					// std::cout<<"1";
+					k.push_back(helptogo->getkeys()[i]);
+					v.push_back(helptogo->getvalues()[i]);		
+					cup++;		
+				}
+			}
+			for (int i = 0; i < cup; ++i)
+			{
+				helptogo->setkeys(i, k[i]);
+				helptogo->setvalues(i, v[i]);
+			}
+			for (int i = 0; i < 2*nodecapacity; ++i)
+			{
+				helptogo->setdeads(i, false);
+			}
+			
+			// if (cup>=1) if(k[1] == 37 && k[0] == 27) std::cout<<"dbhwiajbdkwa: "<<cup;
+			helptogo->setkey_num(cup);
+		 	updateall(helptogo);
+			k.clear();
+			v.clear();
+			cup=0;
+
+			if (helptogo->getright()) helptogo = helptogo->getright();
+			else break;
+		}
+		// std::cout<<*helptogo;
+		// std::cout<<"I was here";
+		while(helptogo) 
+		{
+			// std::cout<<"I was here in dhjkahdkl";
+			helptogo = fixinnode(helptogo);
+		}
+	}
+	template <typename KeyT,typename ValueT> 
+	Node<KeyT, ValueT>* BPlusTree<KeyT,ValueT>::fixinnode(Node<KeyT, ValueT>* current)
+	{
+		// if (current) std::cout<<"CURRENT: "<<*current<<"   CAPAC: "<<current->getkey_num()<<std::endl;
+		if (current->getkey_num() >= nodecapacity - 1)
+		{
+			// std::cout<<"I WAS HERE 666";
+			return current->getleft();
+		}
+		// std::cout<<"I WAS HERE 777"<<nodecapacity;
+		//remember how many keys we need
+		int currentkey_numdif = nodecapacity - 1 - current->getkey_num();
+		Node<KeyT, ValueT>* left_sibling = current->getleft();
+		// if (left_sibling) std::cout<<left_sibling->getkey_num();
+		Node<KeyT, ValueT>* right_sibling = current->getright();
+		int help1 = 0;
+		int help2 = 0;
+		if (left_sibling)  help1 = (left_sibling->getkey_num() - nodecapacity + 1);
+		if (right_sibling) help2 = (right_sibling->getkey_num() - nodecapacity + 1);
+		// if (left_sibling) std::cout<<"numdif: : "<<currentkey_numdif<<"  ava"<<help <<"   "<<std::endl;
+		//if we have this number of keys in leftsibling borrow them from it
+		if(left_sibling && help1 >= currentkey_numdif)
+		{
+			// std::cout<<"I was here 0";
+			current->setkey_num(nodecapacity - 1);
+			for (int i = current->getkey_num() - 1; i >=currentkey_numdif ; --i)
+			{
+				current->setkeys(i, current->getkeys()[i - currentkey_numdif]);
+				current->setvalues(i, current->getvalues()[i - currentkey_numdif]);
+			}
+			for (int i = 0; i < currentkey_numdif; ++i)
+			{
+				// std::cout<<"I was here";
+				current->setkeys(i, left_sibling->getkeys()[left_sibling->getkey_num() - currentkey_numdif + i]);
+				current->setvalues(i, left_sibling->getvalues()[left_sibling->getkey_num() - currentkey_numdif + i]);
+
+			}
+			left_sibling->setkey_num(left_sibling->getkey_num() - currentkey_numdif);
+			updateall(current);
+			return left_sibling;
+		}
+		else if(right_sibling && help2 >= currentkey_numdif)
+		{
+			// std::cout<<"I was here 1";
+			for (int i = 0; i < currentkey_numdif; ++i)
+			{
+				current->setkeys(i + current->getkey_num(), right_sibling->getkeys()[i]);
+				current->setvalues(i + current->getkey_num(), right_sibling->getvalues()[i]);
+			}
+			for (int i = 0; i < right_sibling->getkey_num() - currentkey_numdif; ++i)
+			{
+				right_sibling->setkeys(i, right_sibling->getkeys()[i + currentkey_numdif]);
+				right_sibling->setvalues(i, right_sibling->getvalues()[i + currentkey_numdif]);
+			}
+			current->setkey_num(nodecapacity - 1);
+			right_sibling->setkey_num(right_sibling->getkey_num() - currentkey_numdif);
+			updateall(right_sibling);
+			return current->getleft();
+		}
+		else if(left_sibling && help1 < currentkey_numdif)
+		{
+			// std::cout<<"i was here 2.0";
+			for (int i = 0; i < current->getkey_num(); ++i)
+			{
+				left_sibling->setkeys(i + left_sibling->getkey_num(), current->getkeys()[i]);
+				left_sibling->setvalues(i + left_sibling->getkey_num(), current->getvalues()[i]);
+			}
+			left_sibling->setkey_num(left_sibling->getkey_num() + current->getkey_num());
+			left_sibling->setright(current->getright());
+			if(current->getright()) current->getright()->setleft(left_sibling);
+			current->setkey_num(0);
+			
+			if(current->getparent()  && (current->getparent() != left_sibling->getparent()))
+			{
+				// for (int i = 0; i < current->getparent()->getkey_num(); ++i)
+				// {
+				// 	current->getparent()->setchilds(i, current->getparent()->getchilds()[i+1]);
+				// }
+				// updateall(current->getparent());
+				// std::cout<<"I was here";
+				// std::cout<<"current: "<<*current;
+				// std::cout<<"i was here 2.1";
+				removeinnode(current->getparent(), current->getparent()->getkeys()[0], 0);
+			}
+			else 
+			{
+				// std::cout<<"i was here 2.2";
+				removeinnode(current->getparent(), current->getkeys()[0], 1);
+			}
+			updateall(left_sibling);
+			if (current) delete current;
+			return left_sibling;
+		}
+		else if(right_sibling && (help2 < currentkey_numdif)) 
+		{
+			// std::cout<<"i was here 4";
+			for (int i = 0; i < right_sibling->getkey_num(); ++i)
+			{
+				current->setkeys(i + current->getkey_num(), right_sibling->getkeys()[i]);
+				current->setvalues(i + current->getkey_num(), right_sibling->getvalues()[i]);
+			}
+			current->setkey_num(current->getkey_num() + right_sibling->getkey_num());
+			right_sibling->setkey_num(0);
+			current->setright(right_sibling->getright());
+			if (right_sibling->getright()) right_sibling->getright()->setleft(current);
+			removeinnode(current->getparent(), right_sibling->getkeys()[0], 1);
+			if(right_sibling) delete right_sibling;
+			return current->getleft();
+		}
+		return nullptr;
+	}
 }
 using namespace BPlusTreeN;
 // template struct BPlusTreeN::Node<int,int>;
 // template class BPlusTreeN::BPlusTree<int,int>;
 // int main()
 // {
-// 		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(2);
+// 		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(3);
 // 		ourtree->insert(8,4);
-// 		// if (ourtree->lazyremove(8)) std::cout<<"deleted "<<std::endl;
-// 		// else std::cout<<"nothing to delete "<<std::endl;		// ourtree->insert(9,8);
+// 		ourtree->insert(9,8);
 // 		ourtree->insert(11,2);
 // 		ourtree->insert(15,6);
 // 		ourtree->insert(17,12);
-// 		// ourtree->lazyremove(17);
-// 		// ourtree->lazyremove(11);
-// 		// ourtree->lazyremove(17);
 // 		ourtree->insert(18,0);
 // 		ourtree->insert(22,1);
 // 		ourtree->insert(23,3);
@@ -739,29 +933,58 @@ using namespace BPlusTreeN;
 // 		ourtree->insert(16,555);
 // 		ourtree->insert(30,666);
 // 		ourtree->insert(32,888);
-// 		ourtree->remove(5);
-// 		ourtree->remove(7);
-// 		ourtree->remove(4);
-// 		ourtree->remove(3);
-// 		ourtree->remove(8);
-// 		ourtree->remove(11);
-// 		ourtree->remove(17);
-// 		ourtree->remove(16);
-// 		ourtree->remove(1);
-// 		ourtree->remove(9);
-// 		ourtree->remove(15);
-// 		ourtree->remove(24);
-// 		ourtree->remove(25);
-// 		ourtree->remove(44);
-// 		ourtree->remove(55);
-// 		ourtree->remove(99);
-// 		ourtree->remove(23);
-// 		ourtree->remove(28);
-// 		ourtree->remove(32);
-// 		ourtree->remove(26);
-// 		ourtree->remove(30);
-// 		ourtree->remove(22);
-// 		ourtree->remove(18);
+// 		ourtree->lazyinsert(33,888);
+// 		ourtree->lazyinsert(35,888);
+// 		ourtree->lazyinsert(27,888);
+// 		ourtree->lazyinsert(14,888);
+// 		ourtree->lazyinsert(12,888);
+// 		ourtree->lazyinsert(37,888);
+// 		ourtree->lazyinsert(31,888);
+// 		ourtree->lazyinsert(100,888);
+// 		ourtree->lazyremove(5);
+// 		ourtree->lazyremove(7);
+// 		ourtree->lazyremove(4);
+// 		ourtree->lazyremove(3);
+// 		ourtree->lazyremove(8);
+// 		ourtree->lazyremove(11);
+// 		ourtree->lazyremove(17);
+// 		ourtree->lazyremove(16);
+// 		ourtree->lazyremove(1);
+// 		ourtree->lazyremove(9);
+// 		ourtree->lazyremove(15);
+// 		ourtree->lazyremove(24);
+// 		ourtree->lazyremove(25);
+// 		ourtree->lazyremove(44);
+// 		ourtree->lazyremove(55);
+// 		ourtree->lazyremove(99);
+// 		ourtree->lazyremove(23);
+// 		ourtree->lazyremove(28);
+// 		ourtree->lazyremove(32);
+// 		ourtree->lazyremove(26);
+// 		ourtree->lazyremove(30);
+// 		ourtree->fix();
+// 		ourtree->lazyremove(22);
+// 		ourtree->lazyremove(18);
+// 		ourtree->lazyremove(33);
+// 		ourtree->lazyremove(35);
+// 		// ourtree->fix();
+// 		// std::cout<<"AFTER ALL "<<std::endl;
+// 		ourtree->lazyremove(27);
+// 		ourtree->lazyremove(14);
+// 		// ourtree->fix();
+// 		// ourtree->print(0,ourtree->getroot());
+// 		ourtree->lazyremove(12);
+// 		ourtree->lazyremove(37);
+// 		ourtree->fix();
+// 		ourtree->lazyremove(31);
+// 		ourtree->lazyremove(100);
+// 		// Node<int,int>* helptogo = ourtree->getroot();
+// 		// while(helptogo->getchilds()[0])
+// 		// {
+// 		// 	helptogo = helptogo->getchilds()[0];
+// 		// }
+// 		// std::cout<<"     ndsjknldnlkdslnldsnkl"<<helptogo->getkey_num();
+// 		ourtree->fix();
 // 		ourtree->print(0,ourtree->getroot());
 // 		delete ourtree;
 // }

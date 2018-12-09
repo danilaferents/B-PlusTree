@@ -8,6 +8,7 @@
 #ifndef BPlusTree_hpp
 #define BPlusTree_hpp
 #include <iostream>
+#include <vector>
 #include <stdio.h>
 namespace BPlusTreeN
 {
@@ -178,7 +179,7 @@ namespace BPlusTreeN
 	        	for (int i = 0; i < current.getkey_num(); ++i)
 	        	{
 	        		if(current.getkeys()) os<<current.getkeys()[i]<<" ";
-	        		if(current.getdeads()) os<<current.getdeads()[i]<<" ";
+	        		// if(current.getdeads()) os<<current.getdeads()[i]<<" ";
 	        		// if(current.getleaf() && current.getvalues()) os<<current.getvalues()[i]<<" ";
 	        	}
 	        	os<<std::endl;
@@ -294,8 +295,8 @@ namespace BPlusTreeN
 			// 	root=ourroot;
 			// }
 			bool insert(const KeyT&, const ValueT&);
-			
-			
+			void fix();
+			Node<KeyT, ValueT>* fixinnode(Node<KeyT, ValueT>*);
 			void print(size_t,  Node<KeyT, ValueT>*);
 			bool remove(const KeyT&);
 			bool lazyremove(const KeyT&);
@@ -317,6 +318,7 @@ namespace BPlusTreeN
 	    	void update(Node<KeyT, ValueT>* current,const KeyT key,const KeyT insertkey);
 	    	KeyT minimumkey(Node<KeyT, ValueT>* current);
 			void updateall(Node<KeyT, ValueT>* current);
+			void updatenow(Node<KeyT, ValueT>* current);
 			void lazyinserttoleftsiblings(Node<KeyT, ValueT>* left, Node<KeyT, ValueT>* current, size_t position, const KeyT& key, const ValueT& value, const bool dead);
 			void lazyinserttorightsiblings(Node<KeyT, ValueT>* left, Node<KeyT, ValueT>* current, size_t position, const KeyT& key, const ValueT& value, const bool dead);
 			void  currentdeletedinsert(Node<KeyT, ValueT>* current,const KeyT& key,const ValueT& value);
