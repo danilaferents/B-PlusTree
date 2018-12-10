@@ -4,7 +4,6 @@
 //
 //  Created by Ferents Danila.
 //
-
 #ifndef BPlusTree_hpp
 #define BPlusTree_hpp
 #include <iostream>
@@ -66,28 +65,6 @@ namespace BPlusTreeN
 				if (childs) delete[] childs;
 				if (deads) delete[] deads;
 			}
-			// void freeNode()
-			// {
-			// 	// std::cout<<"1 ";
-			// 	delete [] keys;
-			// 	keys = nullptr;
-			// 	delete [] values;
-			// 	values = nullptr;
-			// 	delete [] childs;
-			// 	childs = nullptr;
-			// 	if (!leaf)
-			// 	{
-			// 		for (int i = 0; i <=key_num; ++i)
-			// 		{
-			// 			if(childs && childs[i]) delete childs[i];
-			// 		}
-			// 		delete [] childs;
-			// 	}
-			// 	else 
-			// 	{
-			// 		delete [] childs;
-			// 	}
-			// }
 			bool iskeyinnode(const KeyT& findkey)
 			{
 				for (int i = 0; i < key_num; ++i)
@@ -322,9 +299,6 @@ namespace BPlusTreeN
 			void lazyinserttoleftsiblings(Node<KeyT, ValueT>* left, Node<KeyT, ValueT>* current, size_t position, const KeyT& key, const ValueT& value, const bool dead);
 			void lazyinserttorightsiblings(Node<KeyT, ValueT>* left, Node<KeyT, ValueT>* current, size_t position, const KeyT& key, const ValueT& value, const bool dead);
 			void  currentdeletedinsert(Node<KeyT, ValueT>* current,const KeyT& key,const ValueT& value);
-	    	// void initializeNode(Node<KeyT,ValueT>*);
-	  //   	void freeNode(Node<KeyT,ValueT>);
-			// };
 		};
 }
 #endif /* BPlusTree_hpp */

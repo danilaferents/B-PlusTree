@@ -9,6 +9,9 @@
 #include <vector>
 #include "gtest/gtest.h"
 #include "BPlusTree.cpp"
+#include <ctime>
+#include <cstdlib>
+#include <algorithm>
 using namespace BPlusTreeN;
 namespace  
 {	
@@ -29,8 +32,6 @@ namespace
 			helpnode = helpnode->getright();
 		}
 	}
-	// template struct Node<int,int>;
-	// template class BPlusTree<int,int>;
     TEST(TestsBinarySearchTree,TestIntersection0)
     {
 		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(2);
@@ -694,6 +695,200 @@ namespace
 			ASSERT_EQ(tocheck1[i], tocheck2[i]);
 		}
 		ourtree->print(0,ourtree->getroot());
+		delete ourtree;
+    }
+    TEST(TestsBinarySearchTree,Lazy6)
+    {
+    	std::vector<int> tocheck1={};
+		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(500);
+		for (int i = 0; i < 50000; ++i)
+		{
+			ourtree->lazyinsert(i,i);
+			if((i<1567 || i>45777) || (i>=9837 && i<=41222)) tocheck1.push_back(i);
+		}
+		for (int i = 1567; i < 9837; ++i)
+		{
+			ourtree->lazyremove(i);
+		}
+		for (int i = 45777; i > 41222; --i)
+		{
+			ourtree->remove(i);
+		}
+		ourtree->fix();
+		std::vector<int> tocheck2={};
+		getvectortocheck(tocheck2, *ourtree);
+		for (int i = 0; i < tocheck2.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		ourtree->print(0,ourtree->getroot());
+		delete ourtree;
+    }
+    TEST(TestsBinarySearchTree,Lazy7)
+    {
+    	std::vector<int> tocheck1={};
+		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(50);
+		for (int i = 0; i < 50000; ++i)
+		{
+			ourtree->lazyinsert(i,i);
+			if((i<1567 || i>82555) || (i>=9837 && i<=75439)) tocheck1.push_back(i);
+		}
+		for (int i = 1567; i < 9837; ++i)
+		{
+			ourtree->lazyremove(i);
+		}
+		for (int i = 82555; i > 75439; --i)
+		{
+			ourtree->remove(i);
+		}
+		ourtree->fix();
+		std::vector<int> tocheck2={};
+		getvectortocheck(tocheck2, *ourtree);
+		for (int i = 0; i < tocheck1.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		ourtree->print(0,ourtree->getroot());
+		delete ourtree;
+    }
+     TEST(TestsBinarySearchTree,Lazy8)
+    {
+    	std::vector<int> tocheck1={};
+		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(5);
+		for (int i = 0; i < 1000; ++i)
+		{
+			ourtree->lazyinsert(i,i);
+			tocheck1.push_back(i);
+		}
+		ourtree->fix();
+		std::vector<int> tocheck2={};
+		getvectortocheck(tocheck2, *ourtree);
+		for (int i = 0; i < tocheck1.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		ourtree->print(0,ourtree->getroot());
+		delete ourtree;
+    }
+	 TEST(TestsBinarySearchTree,Lazy9)
+    {
+    	srand(time(NULL));
+    	std::vector<int> tocheck1={};
+		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(5);
+		for (int i = 0; i < 10000; ++i)
+		{
+			tocheck1.push_back(i);
+		}
+		for (int i = 0; i < 2000; ++i)
+		{
+			int j=rand()%9999;
+			int k=rand()%9999;
+			int temp = tocheck1[j];
+			tocheck1[j] = tocheck1[k];
+			tocheck1[k] = temp;
+		}
+		for (int i = 0; i < tocheck1.size(); ++i)
+		{
+			ourtree->insert(tocheck1[i], tocheck1[i]);
+		}
+		
+		sort(tocheck1.begin(), tocheck1.end());
+		std::vector<int> tocheck2={};
+		getvectortocheck(tocheck2, *ourtree);
+		for (int i = 0; i < tocheck1.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		for (int i = 2000; i < 8000; ++i)
+		{
+			ourtree->lazyremove(i);
+		}
+		ourtree->fix();
+		for (int i = 0; i < 2000; ++i)
+		{
+			ourtree->lazyremove(i);
+		}
+		ourtree->fix();
+		for (int i = 8000; i < 10000; ++i)
+		{
+			ourtree->remove(i);
+		}
+		delete ourtree;
+    }
+     TEST(TestsBinarySearchTree,Lazy10)
+    {
+    	srand(time(NULL));
+    	std::vector<int> tocheck1={};
+		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(5);
+		for (int i = 0; i < 7889; ++i)
+		{
+			tocheck1.push_back(i);
+		}
+		for (int i = 0; i < 6000; ++i)
+		{
+			int j=rand()%7888;
+			int k=rand()%7888;
+			int temp = tocheck1[j];
+			tocheck1[j] = tocheck1[k];
+			tocheck1[k] = temp;
+		}
+		for (int i = 0; i < tocheck1.size(); ++i)
+		{
+			ourtree->lazyinsert(tocheck1[i], tocheck1[i]);
+		}
+		
+		sort(tocheck1.begin(), tocheck1.end());
+		std::vector<int> tocheck2={};
+		getvectortocheck(tocheck2, *ourtree);
+		for (int i = 0; i < tocheck1.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		delete ourtree;
+    }
+    TEST(TestsBinarySearchTree,deletation)
+    {
+    	srand(time(NULL));
+    	std::vector<int> tocheck1={};
+		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(5);
+		for (int i = 0; i < 7889; ++i)
+		{
+			tocheck1.push_back(i);
+		}
+		for (int i = 0; i < 6000; ++i)
+		{
+			int j=rand()%7888;
+			int k=rand()%7888;
+			int temp = tocheck1[j];
+			tocheck1[j] = tocheck1[k];
+			tocheck1[k] = temp;
+		}
+		for (int i = 0; i < tocheck1.size(); ++i)
+		{
+			ourtree->lazyinsert(tocheck1[i], tocheck1[i]);
+		}
+		sort(tocheck1.begin(), tocheck1.end());
+		std::vector<int> tocheck2={};
+		getvectortocheck(tocheck2, *ourtree);
+		for (int i = 0; i < tocheck1.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		for (int i = 0; i < 50000; ++i)
+		{
+			int j=rand()%7888;
+			ourtree->remove(j);
+		}
+		for (int i = 0; i < 7889; ++i)
+		{
+			ourtree->remove(i);
+		}
 		delete ourtree;
     }
 }
