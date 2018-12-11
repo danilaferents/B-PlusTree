@@ -493,33 +493,6 @@ namespace BPlusTreeN
 
 	}
 	template <typename KeyT,typename ValueT> 
-	void BPlusTree<KeyT,ValueT>::updatenow(Node<KeyT, ValueT>* current)
-	{
-		while(current)
-		{
-			for (int i = 0; i < current->getkey_num(); ++i)
-			{
-				if (current->getchilds()[i+1])
-				{
-					current->setkeys(i, minimumkey(current->getchilds()[i+1]));
-				}
-			}
-			current = current->getparent();
-		}
-
-	}
-	template <typename KeyT,typename ValueT> 
-	KeyT BPlusTree<KeyT,ValueT>::minimumkey(Node<KeyT, ValueT>* current)
-	{
-		KeyT helpkey = current->getkeys()[0];
-		while(current)
-		{
-			helpkey = current->getkeys()[0];
-			current = current->getchilds()[0];
-		}
-		return helpkey;
-	}
-	template <typename KeyT,typename ValueT> 
 	void BPlusTree<KeyT,ValueT>::removeinnode(Node<KeyT, ValueT>* current, const KeyT key, const size_t flag)
 	{
 		//check another time

@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <vector>
 #include "gtest/gtest.h"
-#include "BPlusTree.cpp"
+#include "BPlusTree.hpp"
 #include <ctime>
 #include <cstdlib>
 #include <algorithm>
@@ -30,6 +30,21 @@ namespace
 				ourvector.push_back(helpnode->getkeys()[i]);
 			}
 			helpnode = helpnode->getright();
+		}
+	}
+	template <typename KeyT,typename ValueT> 
+	void getvectortocheckall(std::vector<KeyT>& ourvector, Node<KeyT, ValueT>* curleaf)
+	{
+		if (!curleaf) return;
+		for (int i = 0; i < curleaf->getkey_num(); ++i)
+		{
+			ourvector.push_back(curleaf->getkeys()[i]);
+		}
+		if (curleaf->getleaf()) return;
+		for (int i = 0; i <=curleaf->getkey_num(); ++i)
+		{
+			// std::cout<<"k: "<<k<<"i: "<<i<<std::endl;
+			if (curleaf->getchilds()) getvectortocheckall(ourvector,curleaf->getchilds()[i]);
 		}
 	}
     TEST(TestsBinarySearchTree,TestIntersection0)
@@ -728,7 +743,7 @@ namespace
     TEST(TestsBinarySearchTree,Lazy7)
     {
     	std::vector<int> tocheck1={};
-		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(50);
+		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(500);
 		for (int i = 0; i < 50000; ++i)
 		{
 			ourtree->lazyinsert(i,i);
@@ -817,6 +832,7 @@ namespace
 		{
 			ourtree->remove(i);
 		}
+		ourtree->print(0,ourtree->getroot());
 		delete ourtree;
     }
      TEST(TestsBinarySearchTree,Lazy10)
@@ -889,6 +905,132 @@ namespace
 		{
 			ourtree->remove(i);
 		}
+		ourtree->print(0,ourtree->getroot());
+		delete ourtree;
+    }
+    TEST(TestsBinarySearchTree,deletation55)
+    {
+		BPlusTree<int,int> *ourtree = new BPlusTree<int,int>(3);
+		ourtree->insert(5,5);
+		ourtree->insert(10,10);
+		ourtree->insert(15,15);
+		ourtree->insert(2,2);
+		ourtree->insert(19,19);
+		ourtree->insert(33,33);
+		ourtree->insert(3,3);
+		ourtree->insert(11,11);
+		ourtree->insert(22,22);
+		ourtree->insert(13,13);
+		ourtree->insert(19,19);
+		ourtree->insert(35,35);
+		ourtree->insert(17,17);
+		ourtree->insert(3,3);
+
+		ourtree->insert(1,1);
+		ourtree->insert(20,20);
+		ourtree->insert(15,15);
+		ourtree->insert(34,34);
+		ourtree->insert(99,99);
+		ourtree->insert(12,12);
+		ourtree->insert(55,55);
+		ourtree->insert(44,44);
+		ourtree->insert(16,16);
+		ourtree->insert(13,13);
+		ourtree->insert(6,6);
+		ourtree->insert(38,38);
+		ourtree->insert(98,98);
+		ourtree->insert(0,0);
+		std::vector<int> tocheck1={22,3,10,15,0,1,2,3,5,6,10,11,12,13,15,16,17,19,20,35,55,22,33,34,35,38,44,55,98,99};
+		std::vector<int> tocheck2={};
+		getvectortocheckall(tocheck2, ourtree->getroot());
+		for (int i = 0; i < tocheck2.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		ourtree->remove(0);
+		ourtree->remove(3);
+		ourtree->remove(10);
+		tocheck1={22,5,11,15,1,2,5,6,11,12,13,15,16,17,19,20,35,55,22,33,34,35,38,44,55,98,99};
+		tocheck2.clear();
+		getvectortocheckall(tocheck2, ourtree->getroot());
+		for (int i = 0; i < tocheck2.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		ourtree->remove(15);
+		ourtree->remove(16);
+		ourtree->remove(17);
+		ourtree->remove(19);
+		ourtree->remove(20);
+		tocheck1={33,5,11,13,1,2,5,6,11,12,13,22,35,55,33,34,35,38,44,55,98,99};
+		tocheck2.clear();
+		getvectortocheckall(tocheck2, ourtree->getroot());
+		for (int i = 0; i < tocheck2.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		ourtree->remove(35);
+		ourtree->remove(11);
+		ourtree->remove(5);
+		tocheck1={33,6,13,1,2,6,12,13,22,38,55,33,34,38,44,55,98,99};
+		tocheck2.clear();
+		getvectortocheckall(tocheck2, ourtree->getroot());
+		for (int i = 0; i < tocheck2.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		ourtree->remove(33);
+		ourtree->remove(55);
+		ourtree->remove(6);
+		tocheck1={12,22,38,98,1,2,12,13,22,34,38,44,98,99};
+		tocheck2.clear();
+		getvectortocheckall(tocheck2, ourtree->getroot());
+		for (int i = 0; i < tocheck2.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		ourtree->lazyremove(22);
+		ourtree->lazyremove(38);
+		ourtree->fix();
+		tocheck1={12,34,98,1,2,12,13,34,44,98,99};
+		tocheck2.clear();
+		getvectortocheckall(tocheck2, ourtree->getroot());
+		for (int i = 0; i < tocheck2.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		ourtree->lazyremove(12);
+		ourtree->lazyremove(13);
+		ourtree->lazyremove(34);
+		tocheck2.clear();
+		getvectortocheckall(tocheck2, ourtree->getroot());
+		for (int i = 0; i < tocheck2.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		ourtree->fix();
+		tocheck1={98,1,2,44,98,99};
+		tocheck2.clear();
+		getvectortocheckall(tocheck2, ourtree->getroot());
+		for (int i = 0; i < tocheck2.size(); ++i)
+		{
+			// std::cout<<tocheck2[i]<<" ";
+			ASSERT_EQ(tocheck1[i], tocheck2[i]);
+		}
+		ourtree->lazyremove(1);
+		ourtree->lazyremove(2);
+		ourtree->lazyremove(44);
+		ourtree->lazyremove(98);
+		ourtree->lazyremove(99);
+		ourtree->fix();
+		ourtree->print(0,ourtree->getroot());
 		delete ourtree;
     }
 }
