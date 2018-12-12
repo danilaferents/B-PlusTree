@@ -169,32 +169,6 @@ namespace
 		ourtree->insert(91,11);
 		ourtree->insert(97,13);
 		ourtree->print(0,ourtree->getroot());
-		// std::vector<int> answersk={42,20,27,7,14,7,15,18,19,25};
-		// std::vector<int> answersv={6,0,666,6,11,3,9,15,55,24};
-		// size_t k=0;
-		// ASSERT_EQ((ourtree->getroot()->getkeys())[0], answersk[k]);
-		// ASSERT_EQ((ourtree->getroot()->getvalues())[0], answersv[k]);
-		// k++;
-		// for (int i = 0; i < ourtree->getroot()->getkey_num(); ++i)
-		// {
-		// 	ASSERT_EQ((ourtree->getroot()->getkeys())[i], answersk[k]);
-		// 	k++;
-		// }
-		// for (int i = 0; i <=ourtree->getroot()->getkey_num(); ++i)
-		// {
-		// 	if((ourtree->getroot()->getchilds()[i])) 
-		// 	{
-		// 		for (int j = 0; j < ourtree->getroot()->getchilds()[i]->getkey_num(); ++j)
-		// 		{
-		// 			if (ourtree->getroot()->getchilds()[i]->getkeys()) 
-		// 			{
-		// 				ASSERT_EQ(((ourtree->getroot()->getchilds()[i]->getkeys())[j]), answersk[k]);
-		// 				if(ourtree->getroot()->getchilds()[i]->getleaf()) ASSERT_EQ(((ourtree->getroot()->getchilds()[i]->getvalues())[j]), answersv[k]);
-		// 				k++;
-		// 			}
-		// 		}
-		// 	}
-		// }
 		delete ourtree;
 	}
 	TEST(TestsBinarySearchTree,Deletation0)
@@ -457,7 +431,7 @@ namespace
 			// std::cout<<tocheck2[i]<<" ";
 			ASSERT_EQ(tocheck1[i], tocheck2[i]);
 		}
-		ourtree->print(0,ourtree->getroot());
+		// ourtree->print(0,ourtree->getroot());
 		delete ourtree;
 	}
 	TEST(TestsBinarySearchTree,Lazy0)
@@ -667,7 +641,7 @@ namespace
 			// std::cout<<tocheck2[i]<<" ";
 			ASSERT_EQ(tocheck1[i], tocheck2[i]);
 		}
-		ourtree->print(0,ourtree->getroot());
+		// ourtree->print(0,ourtree->getroot());
 		delete ourtree;
     }
     TEST(TestsBinarySearchTree,Lazy4)
@@ -709,7 +683,7 @@ namespace
 			// std::cout<<tocheck2[i]<<" ";
 			ASSERT_EQ(tocheck1[i], tocheck2[i]);
 		}
-		ourtree->print(0,ourtree->getroot());
+		// ourtree->print(0,ourtree->getroot());
 		delete ourtree;
     }
     TEST(TestsBinarySearchTree,Lazy6)
@@ -737,7 +711,7 @@ namespace
 			// std::cout<<tocheck2[i]<<" ";
 			ASSERT_EQ(tocheck1[i], tocheck2[i]);
 		}
-		ourtree->print(0,ourtree->getroot());
+		// ourtree->print(0,ourtree->getroot());
 		delete ourtree;
     }
     TEST(TestsBinarySearchTree,Lazy7)
@@ -765,7 +739,7 @@ namespace
 			// std::cout<<tocheck2[i]<<" ";
 			ASSERT_EQ(tocheck1[i], tocheck2[i]);
 		}
-		ourtree->print(0,ourtree->getroot());
+		// ourtree->print(0,ourtree->getroot());
 		delete ourtree;
     }
      TEST(TestsBinarySearchTree,Lazy8)
@@ -785,7 +759,7 @@ namespace
 			// std::cout<<tocheck2[i]<<" ";
 			ASSERT_EQ(tocheck1[i], tocheck2[i]);
 		}
-		ourtree->print(0,ourtree->getroot());
+		// ourtree->print(0,ourtree->getroot());
 		delete ourtree;
     }
 	 TEST(TestsBinarySearchTree,Lazy9)
